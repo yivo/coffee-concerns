@@ -2,7 +2,7 @@
   "name": "coffee-oop",
   "version": "1.0.0",
   "description": "Concern and Interface patterns for CoffeeScript",
-  "main": "source/oop.coffee",
+  "main": "build/coffee-concerns.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -16,6 +16,7 @@
     "coffee-script": "^1.9.1",
     "gulp": "^3.8.11",
     "gulp-coffee": "^2.3.1",
-    "gulp-concat": "^2.5.2"
+    "gulp-concat": "^2.5.2",
+    "gulp-preprocess": "^1.2.0"
   }
 }
