@@ -26,4 +26,5 @@ human = new Human()
 human.say('Hello')      # => Saying 'Hello'
 human.eat('banana')     # => Eating banana
 Human.createMaleHuman() # => ok
+console.log Human.includes HumanFactoryMethods => true
 ```
