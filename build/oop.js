@@ -1,9 +1,9 @@
 (function() {
-  var extend, isPlainObject,
+  var _implements, extend, implement, include, isPlainObject,
     indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
     hasProp = {}.hasOwnProperty;
 
-  Function.prototype.include = function(Concern) {
+  include = function(Concern) {
     var ClassMembers, InstanceMembers;
     if (!isPlainObject(Concern)) {
       throw "Function::include: Concern must be plain object. You gave " + Concern;
@@ -22,7 +22,7 @@
     return this;
   };
 
-  Function.prototype.implement = function(Interface) {
+  implement = function(Interface) {
     if (!isPlainObject(Interface)) {
       throw "Function::implement: Interface must be plain object. You gave " + Interface;
     }
@@ -37,8 +37,14 @@
     return this;
   };
 
-  Function.prototype["implements"] = function(Interface) {
-    return !!(this._implemenedInterfaces && indexOf.call(this._implemenedInterfaces, Interface) >= 0);
+  _implements = function(Interface) {
+    var implemenedInterfaces;
+    if (this.constructor) {
+      implemenedInterfaces = this.constructor._implemenedInterfaces;
+    } else {
+      implemenedInterfaces = this._implemenedInterfaces;
+    }
+    return !!(implemenedInterfaces && indexOf.call(implemenedInterfaces, Interface) >= 0);
   };
 
   extend = function(object, properties) {
@@ -54,5 +60,21 @@
   isPlainObject = function(object) {
     return object !== null && typeof object === 'object';
   };
+
+  Object.defineProperty(Function.prototype, 'include', {
+    value: include
+  });
+
+  Object.defineProperty(Function.prototype, 'implement', {
+    value: implement
+  });
+
+  Object.defineProperty(Object.prototype, 'implements', {
+    value: _implements
+  });
+
+  Object.defineProperty(Function.prototype, 'implements', {
+    value: _implements
+  });
 
 }).call(this);

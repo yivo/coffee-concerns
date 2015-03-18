@@ -1,4 +1,4 @@
-Function::include = (Concern) ->
+include = (Concern) ->
   unless isPlainObject(Concern)
     throw "Function::include: Concern must be plain object. You gave #{Concern}"
 
@@ -14,7 +14,7 @@ Function::include = (Concern) ->
 
   @
 
-Function::implement = (Interface) ->
+implement = (Interface) ->
   unless isPlainObject(Interface)
     throw "Function::implement: Interface must be plain object. You gave #{Interface}"
 
@@ -31,8 +31,13 @@ Function::implement = (Interface) ->
 
   @
 
-Function::implements = (Interface) ->
-  !!(@_implemenedInterfaces and Interface in @_implemenedInterfaces)
+_implements = (Interface) ->
+  if @prototype
+    implemented = @_implemenedInterfaces
+  else
+    implemented = @constructor._implemenedInterfaces
+
+  !!(implemented and Interface in implemented)
 
 extend = (object, properties) ->
   for own name, value of properties
@@ -41,3 +46,8 @@ extend = (object, properties) ->
 
 isPlainObject = (object) ->
   object isnt null and typeof object is 'object'
+
+Object.defineProperty Function::, 'include',    value: include
+Object.defineProperty Function::, 'implement',  value: implement
+Object.defineProperty Object::,   'implements', value: _implements
+Object.defineProperty Function::, 'implements', value: _implements
