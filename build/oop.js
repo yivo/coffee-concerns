@@ -38,13 +38,13 @@
   };
 
   _implements = function(Interface) {
-    var implemenedInterfaces;
-    if (this.constructor) {
-      implemenedInterfaces = this.constructor._implemenedInterfaces;
+    var implemented;
+    if (this.prototype) {
+      implemented = this._implemenedInterfaces;
     } else {
-      implemenedInterfaces = this._implemenedInterfaces;
+      implemented = this.constructor._implemenedInterfaces;
     }
-    return !!(implemenedInterfaces && indexOf.call(implemenedInterfaces, Interface) >= 0);
+    return !!(implemented && indexOf.call(implemented, Interface) >= 0);
   };
 
   extend = function(object, properties) {
