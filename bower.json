@@ -1,5 +1,5 @@
 {
-  "name": "coffee-oop",
+  "name": "coffee-concerns",
   "version": "1.0.0",
   "authors": [
     "Yaroslav Konoplov <the.yivo@gmail.com>"
@@ -9,6 +9,8 @@
     "node_modules",
     "bower_components",
     "test",
-    "tests"
+    "tests",
+    "spec",
+    "coffeespec"
   ]
 }

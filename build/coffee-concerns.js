@@ -1,7 +1,6 @@
 (function() {
   var indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
-    hasProp = {}.hasOwnProperty,
-    slice = [].slice;
+    hasProp = {}.hasOwnProperty;
 
   (function(root, factory) {
     if (typeof define === 'function' && define.amd) {
@@ -12,35 +11,57 @@
       return factory();
     }
   })(this, function() {
-    var extend, include, includes, isPlainObject, omit;
+    var extend, ignoredInstanceMembers, include, includes, isPlainObject, objectTag;
     include = function(Concern) {
-      var ClassMembers, InstanceMembers, included;
+      var ClassMembers, InstanceMembers, _proto, _super, copy, hadConcerns, holderChanged, included, key, value;
       if (!isPlainObject(Concern)) {
-        throw "Function::include: Concern must be plain object. You gave " + Concern;
+        throw new Error("Concern must be plain object. You gave: " + Concern + ". Class you tried to include in: " + this.name);
+      }
+      hadConcerns = !!this.concerns;
+      holderChanged = hadConcerns && this.concernsHolder !== this;
+      if (hadConcerns && indexOf.call(this.concerns, Concern) >= 0) {
+        return this;
+      }
+      if (hadConcerns) {
+        if (holderChanged) {
+          this.concernsHolder = this;
+          this.concerns = [].concat(this.concerns);
+        }
+      } else {
+        this.concerns = [];
+        this.concernsHolder = this;
+      }
+      if (!hadConcerns || holderChanged) {
+        if (this.__super__) {
+          copy = extend({}, this.__super__);
+          copy.constructor = this.__super__.constructor;
+          this.__super__ = copy;
+        } else {
+          this.__super__ = {};
+        }
       }
       ClassMembers = Concern.ClassMembers;
-      InstanceMembers = Concern.InstanceMembers;
-      InstanceMembers || (InstanceMembers = omit(Concern, 'ClassMembers', 'included'));
+      InstanceMembers = Concern.InstanceMembers || Concern;
       if (ClassMembers) {
         extend(this, ClassMembers);
       }
-      if (InstanceMembers) {
-        extend(this.prototype, InstanceMembers);
+      _super = this.__super__;
+      _proto = this.prototype;
+      for (key in InstanceMembers) {
+        if (!hasProp.call(InstanceMembers, key)) continue;
+        value = InstanceMembers[key];
+        if (indexOf.call(ignoredInstanceMembers, key) < 0) {
+          _super[key] = _proto[key] = value;
+        }
       }
-      this._includedConcerns || (this._includedConcerns = []);
-      this._concernsIncludedIn || (this._concernsIncludedIn = this);
-      if (this._concernsIncludedIn !== this) {
-        this._concernsIncludedIn = this;
-        this._includedConcerns = [].concat(this._includedConcerns);
-      }
-      this._includedConcerns.push(Concern);
+      this.concerns.push(Concern);
       if (included = Concern.included) {
         included.call(Concern, this);
       }
       return this;
     };
     includes = function(Concern) {
-      return !!(this._includedConcerns && indexOf.call(this._includedConcerns, Concern) >= 0);
+      return !!this.concerns && indexOf.call(this.concerns, Concern) >= 0;
     };
     extend = function(object, properties) {
       var name, value;
@@ -51,21 +72,10 @@
       }
       return object;
     };
-    omit = function() {
-      var key, object, omitted, result, value;
-      object = arguments[0], omitted = 2 <= arguments.length ? slice.call(arguments, 1) : [];
-      result = {};
-      for (key in object) {
-        if (!hasProp.call(object, key)) continue;
-        value = object[key];
-        if (indexOf.call(omitted, key) < 0) {
-          result[key] = value;
-        }
-      }
-      return result;
-    };
+    objectTag = typeof {};
+    ignoredInstanceMembers = ['ClassMembers', 'included'];
     isPlainObject = function(object) {
-      return object !== null && typeof object === 'object';
+      return object !== null && typeof object === objectTag;
     };
     Object.defineProperty(Function.prototype, 'include', {
       value: include
