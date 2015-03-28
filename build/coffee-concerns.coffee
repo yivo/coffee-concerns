@@ -12,7 +12,7 @@
       throw new Error("
         Concern must be plain object.
         You gave: #{Concern}.
-        Class you tried to include in: #{@name}
+        Class you tried to include in: #{@name or @}
       ")
   
     hadConcerns   = !!@concerns

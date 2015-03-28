@@ -15,7 +15,7 @@
     include = function(Concern) {
       var ClassMembers, InstanceMembers, _proto, _super, copy, hadConcerns, holderChanged, included, key, value;
       if (!isPlainObject(Concern)) {
-        throw new Error("Concern must be plain object. You gave: " + Concern + ". Class you tried to include in: " + this.name);
+        throw new Error("Concern must be plain object. You gave: " + Concern + ". Class you tried to include in: " + (this.name || this));
       }
       hadConcerns = !!this.concerns;
       holderChanged = hadConcerns && this.concernsHolder !== this;
