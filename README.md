@@ -148,6 +148,6 @@ class IceCream extends Product
 ### Testing
 Jasmine was chosen as test framework
 Install dependencies
-`npm install`
+  `npm install`
 Run tests
-`npm test`
+  `npm test`
