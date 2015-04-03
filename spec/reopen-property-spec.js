@@ -20,7 +20,7 @@ describe('Property when reopened', function() {
     return base;
   };
   return it('should correctly be extended', function() {
-    var Base, Derived;
+    var Base, DerivedBar, DerivedFoo, previous;
     Base = (function() {
       function Base() {}
 
@@ -34,29 +34,63 @@ describe('Property when reopened', function() {
       return Base;
 
     })();
-    Derived = (function(superClass) {
-      extend1(Derived, superClass);
+    DerivedFoo = (function(superClass) {
+      extend1(DerivedFoo, superClass);
 
-      function Derived() {
-        return Derived.__super__.constructor.apply(this, arguments);
+      function DerivedFoo() {
+        return DerivedFoo.__super__.constructor.apply(this, arguments);
       }
 
-      Derived.reopen('hash', function() {
+      DerivedFoo.reopen('hash', function() {
         return this.baz = 3;
       });
 
-      Derived.reopen('array', [4]);
+      DerivedFoo.reopen('array', [4]);
 
-      return Derived;
+      return DerivedFoo;
+
+    })(Base);
+    DerivedBar = (function(superClass) {
+      extend1(DerivedBar, superClass);
+
+      function DerivedBar() {
+        return DerivedBar.__super__.constructor.apply(this, arguments);
+      }
+
+      DerivedBar.reopen('hash', {
+        bar: 42
+      });
+
+      DerivedBar.reopen('array', function(array) {
+        return array.shift();
+      });
+
+      return DerivedBar;
 
     })(Base);
     expect(Base.prototype.hash).toEqual({
       foo: 1,
       bar: 2
     });
-    expect(Derived.prototype.hash).toEqual(extend({}, Base.prototype.hash, {
+    expect(DerivedFoo.prototype.hash).toEqual(extend({}, Base.prototype.hash, {
       baz: 3
     }));
-    return expect(Derived.prototype.array).toEqual([].concat(Base.prototype.array, [4]));
+    expect(DerivedFoo.prototype.array).toEqual([].concat(Base.prototype.array, [4]));
+    expect(DerivedBar.prototype.hash).toEqual(extend({}, Base.prototype.hash, {
+      bar: 42
+    }));
+    expect(DerivedBar.prototype.array).toEqual(Base.prototype.array.slice(1));
+    expect(DerivedFoo.__super__.hash).toBe(Base.prototype.hash);
+    expect(DerivedFoo.__super__.array).toBe(Base.prototype.array);
+    expect(DerivedBar.__super__.hash).toBe(Base.prototype.hash);
+    expect(DerivedBar.__super__.array).toBe(Base.prototype.array);
+    previous = DerivedBar.prototype.hash;
+    DerivedBar.reopen('hash', {
+      bar: 50
+    });
+    expect(DerivedBar.prototype.hash).toBe(previous);
+    return expect(DerivedBar.prototype.hash).toEqual(extend({}, Base.prototype.hash, {
+      bar: 50
+    }));
   });
 });
