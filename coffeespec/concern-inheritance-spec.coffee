@@ -10,6 +10,9 @@ describe 'Concern when inherited', ->
       baz: 3
     text: 'foo'
 
+    ClassMembers:
+      array: [3]
+
   extend = (base, objs...) ->
     for obj in objs
       base[prop] = value for own prop, value of obj
@@ -33,9 +36,23 @@ describe 'Concern when inherited', ->
       hash:
         qux: 4
 
-    class Derived extends Base
+      @array: [1]
+
+    class DerivedFoo extends Base
       @include Concern
 
-    expect(Derived.__super__.method).toBe Concern.method
-    expect(Derived.__super__.hash).toBe Base::hash
-    expect(Derived::hash).toEqual extend({}, Base::hash, Concern.hash)
+    class DerivedBar extends Base
+      @array: [2]
+      @include Concern
+
+    expect(DerivedFoo.__super__.method).toBe Concern.method
+    expect(DerivedFoo.__super__.hash).toBe Base::hash
+    expect(DerivedFoo::hash).toEqual extend({}, Base::hash, Concern.hash)
+
+    expect(DerivedBar.__super__.method).toBe Concern.method
+    expect(DerivedBar.__super__.hash).toBe Base::hash
+    expect(DerivedBar::hash).toEqual extend({}, Base::hash, Concern.hash)
+
+    expect(Base.array).toEqual [1]
+    expect(DerivedFoo.array).toEqual [1,3]
+    expect(DerivedBar.array).toEqual [2,3]

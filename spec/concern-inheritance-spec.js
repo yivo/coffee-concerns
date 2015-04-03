@@ -13,7 +13,10 @@ describe('Concern when inherited', function() {
       bar: 2,
       baz: 3
     },
-    text: 'foo'
+    text: 'foo',
+    ClassMembers: {
+      array: [3]
+    }
   };
   extend = function() {
     var base, i, len, obj, objs, prop, value;
@@ -56,7 +59,7 @@ describe('Concern when inherited', function() {
     return expect(Derived.__super__.text).toBe(Concern.text);
   });
   return it('should correctly override', function() {
-    var Base, Derived;
+    var Base, DerivedBar, DerivedFoo;
     Base = (function() {
       function Base() {}
 
@@ -66,23 +69,45 @@ describe('Concern when inherited', function() {
         qux: 4
       };
 
+      Base.array = [1];
+
       return Base;
 
     })();
-    Derived = (function(superClass) {
-      extend1(Derived, superClass);
+    DerivedFoo = (function(superClass) {
+      extend1(DerivedFoo, superClass);
 
-      function Derived() {
-        return Derived.__super__.constructor.apply(this, arguments);
+      function DerivedFoo() {
+        return DerivedFoo.__super__.constructor.apply(this, arguments);
       }
 
-      Derived.include(Concern);
+      DerivedFoo.include(Concern);
 
-      return Derived;
+      return DerivedFoo;
 
     })(Base);
-    expect(Derived.__super__.method).toBe(Concern.method);
-    expect(Derived.__super__.hash).toBe(Base.prototype.hash);
-    return expect(Derived.prototype.hash).toEqual(extend({}, Base.prototype.hash, Concern.hash));
+    DerivedBar = (function(superClass) {
+      extend1(DerivedBar, superClass);
+
+      function DerivedBar() {
+        return DerivedBar.__super__.constructor.apply(this, arguments);
+      }
+
+      DerivedBar.array = [2];
+
+      DerivedBar.include(Concern);
+
+      return DerivedBar;
+
+    })(Base);
+    expect(DerivedFoo.__super__.method).toBe(Concern.method);
+    expect(DerivedFoo.__super__.hash).toBe(Base.prototype.hash);
+    expect(DerivedFoo.prototype.hash).toEqual(extend({}, Base.prototype.hash, Concern.hash));
+    expect(DerivedBar.__super__.method).toBe(Concern.method);
+    expect(DerivedBar.__super__.hash).toBe(Base.prototype.hash);
+    expect(DerivedBar.prototype.hash).toEqual(extend({}, Base.prototype.hash, Concern.hash));
+    expect(Base.array).toEqual([1]);
+    expect(DerivedFoo.array).toEqual([1, 3]);
+    return expect(DerivedBar.array).toEqual([2, 3]);
   });
 });

@@ -18,16 +18,18 @@
         throw new Error("Concern must be plain object. You gave: " + Concern + ". Class you tried to include in: " + (this.name || this));
       }
       hasConcerns = !!this.concerns;
-      hasOwnConcerns = hasConcerns && hasOwnProp.call(this, 'concerns');
+      hasOwnConcerns = hasConcerns && this.concernsOwner === this;
       if (hasConcerns && indexOf.call(this.concerns, Concern) >= 0) {
         return this;
       }
       if (hasConcerns) {
         if (!hasOwnConcerns) {
           this.concerns = [].concat(this.concerns);
+          this.concernsOwner = this;
         }
       } else {
         this.concerns = [];
+        this.concernsOwner = this;
       }
       if (!hasConcerns || !hasOwnConcerns) {
         if (this.__super__) {
@@ -50,17 +52,9 @@
           nextVal = ClassMembers[prop];
           prevVal = _class[prop];
           if (bothPlainObjects(prevVal, nextVal)) {
-            if (hasOwnProp.call(_class, prop)) {
-              extend(prevVal, nextVal);
-            } else {
-              _class[prop] = extend({}, prevVal, nextVal);
-            }
+            _class[prop] = extend({}, prevVal, nextVal);
           } else if (bothArrays(prevVal, nextVal)) {
-            if (hasOwnProp.call(_class, prop)) {
-              arrayPush.apply(prevVal, nextVal);
-            } else {
-              _class[prop] = [].concat(prevVal, nextVal);
-            }
+            _class[prop] = [].concat(prevVal, nextVal);
           } else {
             _class[prop] = nextVal;
           }

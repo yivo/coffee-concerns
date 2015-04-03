@@ -16,15 +16,17 @@
       "
   
     hasConcerns    = !!@concerns
-    hasOwnConcerns = hasConcerns and hasOwnProp.call(@, 'concerns')
+    hasOwnConcerns = hasConcerns and @concernsOwner is @
   
     return @ if hasConcerns and Concern in @concerns
   
     if hasConcerns
       unless hasOwnConcerns
         @concerns = [].concat(@concerns)
+        @concernsOwner = @
     else
       @concerns = []
+      @concernsOwner = @
   
     if not hasConcerns or not hasOwnConcerns
       if @__super__
@@ -46,16 +48,10 @@
         prevVal = _class[prop]
   
         if bothPlainObjects(prevVal, nextVal)
-          if hasOwnProp.call(_class, prop)
-            extend(prevVal, nextVal)
-          else
-            _class[prop] = extend({}, prevVal, nextVal)
+          _class[prop] = extend({}, prevVal, nextVal)
   
         else if bothArrays(prevVal, nextVal)
-          if hasOwnProp.call(_class, prop)
-            arrayPush.apply(prevVal, nextVal)
-          else
-            _class[prop] = [].concat(prevVal, nextVal)
+          _class[prop] = [].concat(prevVal, nextVal)
   
         else
           _class[prop] = nextVal
