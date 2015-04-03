@@ -99,7 +99,7 @@ class Derived extends base
   # You can find previous value of `obj` in super: Derived.__super__.obj
 ```
 You can reopen objects and array. Reopening other data types will cause nothing.
-## Check the complete example
+### Check the complete example
 ```coffeescript
 PriceFormats =
   priceWithSign: -> "$#{@price}"
@@ -146,8 +146,5 @@ class IceCream extends Product
 ```
 
 ### Testing
-Jasmine was chosen as test framework
-Install dependencies
-  `npm install`
-Run tests
-  `npm test`
+Jasmine was chosen as test framework.
+Install dependencies: `npm install` and run tests: `npm test`
