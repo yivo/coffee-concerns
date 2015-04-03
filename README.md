@@ -1,3 +1,6 @@
+# coffee-concerns
+Concern pattern for CoffeeScript
+
 ### Defining concern
 
 You must define concern like plain object.
@@ -141,3 +144,10 @@ class IceCream extends Product
 
   priceWithCy: -> "#{super} per 100 grams"
 ```
+
+### Testing
+Jasmine was chosen as test framework
+Install dependencies
+`npm install`
+Run tests
+`npm test`
