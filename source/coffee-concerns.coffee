@@ -32,7 +32,6 @@ include = (Concern) ->
   _class = @
   _super = @__super__
   _proto = @::
-  hook   = 'included'
 
   if ClassMembers
     for own prop, nextVal of ClassMembers
@@ -47,7 +46,7 @@ include = (Concern) ->
       else
         _class[prop] = nextVal
 
-  for own prop, nextVal of InstanceMembers when prop isnt hook
+  for own prop, nextVal of InstanceMembers when prop not in tabooMembers
     prevVal = _proto[prop]
     if bothFunctions(prevVal, nextVal)
       _super[prop] = _proto[prop] = nextVal
@@ -92,8 +91,8 @@ reopen = (prop, modifier) ->
 
   value
 
+tabooMembers  = ['included', 'ClassMembers']
 isFunction    = _.bind(_.isFunction, _)
-isObject      = _.bind(_.isObject, _)
 isArray       = _.bind(_.isArray, _)
 isPlainObject = _.bind(_.isPlainObject, _)
 extend        = _.bind(_.extend, _)

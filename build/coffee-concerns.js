@@ -11,9 +11,9 @@
       return factory(root._);
     }
   })(this, function(_) {
-    var arrayPush, bothArrays, bothFunctions, bothPlainObjects, clone, extend, hasOwnProp, include, includes, isArray, isFunction, isObject, isPlainObject, reopen;
+    var arrayPush, bothArrays, bothFunctions, bothPlainObjects, clone, extend, hasOwnProp, include, includes, isArray, isFunction, isPlainObject, reopen, tabooMembers;
     include = function(Concern) {
-      var ClassMembers, InstanceMembers, _class, _proto, _super, copy, hasConcerns, hasOwnConcerns, hook, included, nextVal, prevVal, prop;
+      var ClassMembers, InstanceMembers, _class, _proto, _super, copy, hasConcerns, hasOwnConcerns, included, nextVal, prevVal, prop;
       if (!isPlainObject(Concern)) {
         throw new Error("Concern must be plain object. You gave: " + Concern + ". Class you tried to include in: " + (this.name || this));
       }
@@ -45,7 +45,6 @@
       _class = this;
       _super = this.__super__;
       _proto = this.prototype;
-      hook = 'included';
       if (ClassMembers) {
         for (prop in ClassMembers) {
           if (!hasProp.call(ClassMembers, prop)) continue;
@@ -63,7 +62,7 @@
       for (prop in InstanceMembers) {
         if (!hasProp.call(InstanceMembers, prop)) continue;
         nextVal = InstanceMembers[prop];
-        if (!(prop !== hook)) {
+        if (!(indexOf.call(tabooMembers, prop) < 0)) {
           continue;
         }
         prevVal = _proto[prop];
@@ -112,8 +111,8 @@
       }
       return value;
     };
+    tabooMembers = ['included', 'ClassMembers'];
     isFunction = _.bind(_.isFunction, _);
-    isObject = _.bind(_.isObject, _);
     isArray = _.bind(_.isArray, _);
     isPlainObject = _.bind(_.isPlainObject, _);
     extend = _.bind(_.extend, _);
