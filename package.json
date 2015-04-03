@@ -4,7 +4,7 @@
   "description": "Concern and Interface patterns for CoffeeScript",
   "main": "build/coffee-concerns.js",
   "scripts": {
-    "test": "gulp coffeespec && jasmine"
+    "test": "gulp build && gulp coffeespec && jasmine"
   },
   "repository": {
     "type": "git",
@@ -20,5 +20,8 @@
     "gulp-concat": "^2.5.2",
     "gulp-preprocess": "^1.2.0",
     "jasmine": "^2.2.1"
+  },
+  "dependencies": {
+    "lodash": "^3.6.0"
   }
 }
