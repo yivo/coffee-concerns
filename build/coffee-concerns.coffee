@@ -1,8 +1,8 @@
 ((root, factory) ->
   if typeof define is 'function' and define.amd
-    define ['lodash'], factory
+    define(['lodash'], factory)
   else if typeof exports is 'object' && typeof module is 'object'
-    module.exports = factory require('lodash')
+    module.exports = factory(require('lodash'))
   else
     factory(root._)
 )(@, (_) ->
@@ -126,5 +126,4 @@
   Object.defineProperty Function::, 'includes', value: includes
   
   return
-
 )

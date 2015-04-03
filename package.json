@@ -1,5 +1,5 @@
 {
-  "name": "coffee-oop",
+  "name": "coffee-concerns",
   "version": "1.0.0",
   "description": "Concern and Interface patterns for CoffeeScript",
   "main": "build/coffee-concerns.js",
@@ -18,7 +18,7 @@
     "gulp": "^3.8.11",
     "gulp-coffee": "^2.3.1",
     "gulp-concat": "^2.5.2",
-    "gulp-preprocess": "^1.2.0",
+    "gulp-iife": "git://github.com/yivo/gulp-iife",
     "jasmine": "^2.2.1"
   },
   "dependencies": {

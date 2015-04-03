@@ -1,16 +1,16 @@
 gulp       = require 'gulp'
 coffee     = require 'gulp-coffee'
 concat     = require 'gulp-concat'
-preprocess = require 'gulp-preprocess'
+iife       = require 'gulp-iife'
 del        = require 'del'
 
 gulp.task 'default', ->
   gulp.start 'build'
 
 gulp.task 'build', ->
-  gulp.src('source/bundle.coffee')
-    .pipe preprocess()
-    .pipe concat('coffee-concerns.coffee')
+  dependencies = lodash: '_'
+  gulp.src('source/coffee-concerns.coffee')
+    .pipe iife {type: 'coffee', dependencies}
     .pipe gulp.dest('build')
     .pipe coffee()
     .pipe concat('coffee-concerns.js')
