@@ -1,7 +1,7 @@
 ((root, factory) ->
   if typeof define is 'function' and define.amd
     define(['lodash'], factory)
-  else if typeof exports is 'object' && typeof module is 'object'
+  else if typeof module is 'object' && typeof module.exports is 'object'
     module.exports = factory(require('lodash'))
   else
     factory(root._)

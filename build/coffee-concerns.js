@@ -5,7 +5,7 @@
   (function(root, factory) {
     if (typeof define === 'function' && define.amd) {
       return define(['lodash'], factory);
-    } else if (typeof exports === 'object' && typeof module === 'object') {
+    } else if (typeof module === 'object' && typeof module.exports === 'object') {
       return module.exports = factory(require('lodash'));
     } else {
       return factory(root._);
