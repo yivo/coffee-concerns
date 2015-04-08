@@ -19,7 +19,7 @@ describe('Property when reopened', function() {
     }
     return base;
   };
-  return it('should correctly be extended', function() {
+  it('should correctly be extended', function() {
     var Base, DerivedBar, DerivedFoo, previous;
     Base = (function() {
       function Base() {}
@@ -92,5 +92,33 @@ describe('Property when reopened', function() {
     return expect(DerivedBar.prototype.hash).toEqual(extend({}, Base.prototype.hash, {
       bar: 50
     }));
+  });
+  return it('should set property when it is not defined', function() {
+    var Bar, Foo;
+    Foo = (function() {
+      function Foo() {}
+
+      Foo.reopen('property', [1, 2, 3]);
+
+      return Foo;
+
+    })();
+    Bar = (function() {
+      function Bar() {}
+
+      Bar.reopen('property', {
+        banana: 1
+      });
+
+      Bar.reopen('string', 'Hello!');
+
+      return Bar;
+
+    })();
+    expect(Foo.prototype.property).toEqual([1, 2, 3]);
+    expect(Bar.prototype.property).toEqual({
+      banana: 1
+    });
+    return expect(Bar.prototype.string).toEqual('Hello!');
   });
 });

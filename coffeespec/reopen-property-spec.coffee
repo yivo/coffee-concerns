@@ -45,3 +45,15 @@ describe 'Property when reopened', ->
 
     expect(DerivedBar::hash).toBe previous
     expect(DerivedBar::hash).toEqual extend({}, Base::hash, bar: 50)
+
+  it 'should set property when it is not defined', ->
+    class Foo
+      @reopen 'property', [1,2,3]
+
+    class Bar
+      @reopen 'property', banana: 1
+      @reopen 'string', 'Hello!'
+
+    expect(Foo::property).toEqual [1,2,3]
+    expect(Bar::property).toEqual banana: 1
+    expect(Bar::string).toEqual 'Hello!'

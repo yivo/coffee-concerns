@@ -80,32 +80,38 @@
     proto = @::
     value = proto[prop]
   
-    isObj = isPlainObject(value)
-    isArr = !isObj and isArray(value)
+    isSet = value isnt undefined and value isnt null
   
-    return value unless isObj or isArr
+    if isSet
+      isObj = isSet and isPlainObject(value)
+      isArr = isSet and !isObj and isArray(value)
   
-    unless hasOwnProp.call(proto, prop)
-      value = proto[prop] = clone(value)
+      return value unless isObj or isArr
   
-    if modifier
-      if isFunction(modifier)
-        modifier.call(value, value)
+      unless hasOwnProp.call(proto, prop)
+        value = proto[prop] = clone(value)
   
-      else if isPlainObject(modifier)
-        extend(value, modifier) if isObj
+      if modifier
+        if isFunction(modifier)
+          modifier.call(value, value)
   
-      else if isArray(modifier)
-        arrayPush.apply(value, modifier) if isArr
+        else if isPlainObject(modifier)
+          extend(value, modifier) if isObj
+  
+        else if isArray(modifier)
+          arrayPush.apply(value, modifier) if isArr
+  
+    else
+      proto[prop] = modifier
   
     value
   
   tabooMembers  = ['included', 'ClassMembers']
-  isFunction    = _.bind(_.isFunction, _)
-  isArray       = _.bind(_.isArray, _)
-  isPlainObject = _.bind(_.isPlainObject, _)
-  extend        = _.bind(_.extend, _)
-  clone         = _.bind(_.clone, _)
+  isFunction    = _.isFunction
+  isArray       = _.isArray
+  isPlainObject = _.isPlainObject
+  extend        = _.extend
+  clone         = _.clone
   hasOwnProp    = {}.hasOwnProperty
   arrayPush     = [].push
   

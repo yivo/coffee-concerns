@@ -85,38 +85,43 @@
       return this;
     };
     reopen = function(prop, modifier) {
-      var isArr, isObj, proto, value;
+      var isArr, isObj, isSet, proto, value;
       proto = this.prototype;
       value = proto[prop];
-      isObj = isPlainObject(value);
-      isArr = !isObj && isArray(value);
-      if (!(isObj || isArr)) {
-        return value;
-      }
-      if (!hasOwnProp.call(proto, prop)) {
-        value = proto[prop] = clone(value);
-      }
-      if (modifier) {
-        if (isFunction(modifier)) {
-          modifier.call(value, value);
-        } else if (isPlainObject(modifier)) {
-          if (isObj) {
-            extend(value, modifier);
-          }
-        } else if (isArray(modifier)) {
-          if (isArr) {
-            arrayPush.apply(value, modifier);
+      isSet = value !== void 0 && value !== null;
+      if (isSet) {
+        isObj = isSet && isPlainObject(value);
+        isArr = isSet && !isObj && isArray(value);
+        if (!(isObj || isArr)) {
+          return value;
+        }
+        if (!hasOwnProp.call(proto, prop)) {
+          value = proto[prop] = clone(value);
+        }
+        if (modifier) {
+          if (isFunction(modifier)) {
+            modifier.call(value, value);
+          } else if (isPlainObject(modifier)) {
+            if (isObj) {
+              extend(value, modifier);
+            }
+          } else if (isArray(modifier)) {
+            if (isArr) {
+              arrayPush.apply(value, modifier);
+            }
           }
         }
+      } else {
+        proto[prop] = modifier;
       }
       return value;
     };
     tabooMembers = ['included', 'ClassMembers'];
-    isFunction = _.bind(_.isFunction, _);
-    isArray = _.bind(_.isArray, _);
-    isPlainObject = _.bind(_.isPlainObject, _);
-    extend = _.bind(_.extend, _);
-    clone = _.bind(_.clone, _);
+    isFunction = _.isFunction;
+    isArray = _.isArray;
+    isPlainObject = _.isPlainObject;
+    extend = _.extend;
+    clone = _.clone;
     hasOwnProp = {}.hasOwnProperty;
     arrayPush = [].push;
     bothPlainObjects = function(obj, other) {
