@@ -51,6 +51,7 @@ describe('Concern when inherited', function() {
       return Derived;
 
     })(Base);
+    expect(Base.__super__.method).toBe(Concern.method);
     expect(Derived.prototype.method).toBe(Concern.method);
     expect(Derived.prototype.hash).toBe(Concern.hash);
     expect(Derived.prototype.text).toBe(Concern.text);

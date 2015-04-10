@@ -66,17 +66,15 @@
           continue;
         }
         prevVal = _proto[prop];
-        if (bothFunctions(prevVal, nextVal)) {
-          _super[prop] = _proto[prop] = nextVal;
+        if (bothPlainObjects(prevVal, nextVal)) {
+          nextVal = extend({}, prevVal, nextVal);
+        } else if (bothArrays(prevVal, nextVal)) {
+          nextVal = [].concat(prevVal, nextVal);
         } else {
-          if (bothPlainObjects(prevVal, nextVal)) {
-            nextVal = extend({}, prevVal, nextVal);
-          } else if (bothArrays(prevVal, nextVal)) {
-            nextVal = [].concat(prevVal, nextVal);
-          }
-          _super[prop] = prevVal;
-          _proto[prop] = nextVal;
+          prevVal = nextVal;
         }
+        _super[prop] = prevVal;
+        _proto[prop] = nextVal;
       }
       this.concerns.push(Concern);
       if (included = Concern.included) {

@@ -23,6 +23,8 @@ describe 'Concern when inherited', ->
       @include Concern
     class Derived extends Base
 
+    expect(Base.__super__.method).toBe Concern.method
+
     expect(Derived::method).toBe Concern.method
     expect(Derived::hash).toBe Concern.hash
     expect(Derived::text).toBe Concern.text

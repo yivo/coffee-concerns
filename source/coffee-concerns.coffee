@@ -48,17 +48,16 @@ include = (Concern) ->
 
   for own prop, nextVal of InstanceMembers when prop not in tabooMembers
     prevVal = _proto[prop]
-    if bothFunctions(prevVal, nextVal)
-      _super[prop] = _proto[prop] = nextVal
 
+    if bothPlainObjects(prevVal, nextVal)
+      nextVal = extend({}, prevVal, nextVal)
+    else if bothArrays(prevVal, nextVal)
+      nextVal = [].concat(prevVal, nextVal)
     else
-      if bothPlainObjects(prevVal, nextVal)
-        nextVal = extend({}, prevVal, nextVal)
-      else if bothArrays(prevVal, nextVal)
-        nextVal = [].concat(prevVal, nextVal)
+      prevVal = nextVal
 
-      _super[prop] = prevVal
-      _proto[prop] = nextVal
+    _super[prop] = prevVal
+    _proto[prop] = nextVal
 
   @concerns.push(Concern)
 
