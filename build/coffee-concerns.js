@@ -11,9 +11,9 @@
       return factory(root._);
     }
   })(this, function(_) {
-    var arrayPush, bothArrays, bothFunctions, bothPlainObjects, clone, extend, hasOwnProp, include, includes, isArray, isFunction, isPlainObject, reopen, tabooMembers;
+    var bothArrays, bothFunctions, bothPlainObjects, clone, copySuper, extend, hasOwnProp, include, includes, isArray, isFunction, isPlainObject, prop, push, ref, reopen, reopenArray, reopenObject, tabooMembers, value;
     include = function(Concern) {
-      var ClassMembers, InstanceMembers, _class, _proto, _super, copy, hasConcerns, hasOwnConcerns, included, nextVal, prevVal, prop;
+      var ClassMembers, InstanceMembers, _class, _proto, _super, hasConcerns, hasOwnConcerns, included, nextVal, prevVal, prop;
       if (!isPlainObject(Concern)) {
         throw new Error("Concern must be plain object. You gave: " + Concern + ". Class you tried to include in: " + (this.name || this));
       }
@@ -31,19 +31,10 @@
         this.concerns = [];
         this.concernsOwner = this;
       }
-      if (!hasConcerns || !hasOwnConcerns) {
-        if (this.__super__) {
-          copy = extend({}, this.__super__);
-          copy.constructor = this.__super__.constructor;
-          this.__super__ = copy;
-        } else {
-          this.__super__ = {};
-        }
-      }
       ClassMembers = Concern.ClassMembers;
       InstanceMembers = Concern.InstanceMembers || Concern;
       _class = this;
-      _super = this.__super__;
+      _super = copySuper(this);
       _proto = this.prototype;
       if (ClassMembers) {
         for (prop in ClassMembers) {
@@ -86,13 +77,13 @@
       var isArr, isObj, isSet, proto, value;
       proto = this.prototype;
       value = proto[prop];
-      isSet = value !== void 0 && value !== null;
+      isSet = proto[prop] != null;
+      isObj = isSet && isPlainObject(value);
+      isArr = isSet && !isObj && isArray(value);
       if (isSet) {
-        isObj = isSet && isPlainObject(value);
-        isArr = isSet && !isObj && isArray(value);
-        if (!(isObj || isArr)) {
-          return value;
-        }
+        copySuper(this)[prop] = value;
+      }
+      if (isObj || isArr) {
         if (!hasOwnProp.call(proto, prop)) {
           value = proto[prop] = clone(value);
         }
@@ -105,14 +96,38 @@
             }
           } else if (isArray(modifier)) {
             if (isArr) {
-              arrayPush.apply(value, modifier);
+              push.apply(value, modifier);
             }
           }
         }
-      } else {
+      } else if (modifier) {
         proto[prop] = modifier;
       }
       return value;
+    };
+    reopenArray = function(prop) {
+      var base;
+      (base = this.prototype)[prop] || (base[prop] = []);
+      return this.reopen.apply(this, arguments);
+    };
+    reopenObject = function(prop) {
+      var base;
+      (base = this.prototype)[prop] || (base[prop] = {});
+      return this.reopen.apply(this, arguments);
+    };
+    copySuper = function(obj) {
+      var copy;
+      if (obj.superCopier !== obj) {
+        if (obj.__super__) {
+          copy = extend({}, obj.__super__);
+          copy.constructor = obj.__super__.constructor;
+          obj.__super__ = copy;
+        } else {
+          obj.__super__ = {};
+        }
+        obj.superCopier = obj;
+      }
+      return obj.__super__;
     };
     tabooMembers = ['included', 'ClassMembers'];
     isFunction = _.isFunction;
@@ -121,7 +136,7 @@
     extend = _.extend;
     clone = _.clone;
     hasOwnProp = {}.hasOwnProperty;
-    arrayPush = [].push;
+    push = [].push;
     bothPlainObjects = function(obj, other) {
       return isPlainObject(obj) && isPlainObject(other);
     };
@@ -134,15 +149,19 @@
     includes = function(Concern) {
       return !!this.concerns && indexOf.call(this.concerns, Concern) >= 0;
     };
-    Object.defineProperty(Function.prototype, 'include', {
-      value: include
-    });
-    Object.defineProperty(Function.prototype, 'reopen', {
-      value: reopen
-    });
-    Object.defineProperty(Function.prototype, 'includes', {
-      value: includes
-    });
+    ref = {
+      include: include,
+      includes: includes,
+      reopen: reopen,
+      reopenArray: reopenArray,
+      reopenObject: reopenObject
+    };
+    for (prop in ref) {
+      value = ref[prop];
+      Object.defineProperty(Function.prototype, prop, {
+        value: value
+      });
+    }
   });
 
 }).call(this);

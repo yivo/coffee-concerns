@@ -98,7 +98,7 @@ class Derived extends base
 
   # You can find previous value of `obj` in super: Derived.__super__.obj
 ```
-You can reopen objects and array. Reopening other data types will cause nothing.
+You can reopen objects and array. Reopening other data types will cause in simple assignment.
 ### Check the complete example
 ```coffeescript
 PriceFormats =

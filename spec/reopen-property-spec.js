@@ -72,6 +72,7 @@ describe('Property when reopened', function() {
       foo: 1,
       bar: 2
     });
+    expect(Base.prototype.array).toEqual([1, 2, 3]);
     expect(DerivedFoo.prototype.hash).toEqual(extend({}, Base.prototype.hash, {
       baz: 3
     }));
@@ -93,7 +94,7 @@ describe('Property when reopened', function() {
       bar: 50
     }));
   });
-  return it('should set property when it is not defined', function() {
+  it('should set property when it is not defined', function() {
     var Bar, Foo;
     Foo = (function() {
       function Foo() {}
@@ -120,5 +121,115 @@ describe('Property when reopened', function() {
       banana: 1
     });
     return expect(Bar.prototype.string).toEqual('Hello!');
+  });
+  it('should correctly save previous value in super', function() {
+    var Base, Derived1, Derived2, OtherDerived1, OtherDerived2;
+    Base = (function() {
+      function Base() {}
+
+      Base.prototype.hash = {
+        foo: 1
+      };
+
+      return Base;
+
+    })();
+    Derived1 = (function(superClass) {
+      extend1(Derived1, superClass);
+
+      function Derived1() {
+        return Derived1.__super__.constructor.apply(this, arguments);
+      }
+
+      Derived1.reopen('hash', {
+        bar: 2
+      });
+
+      return Derived1;
+
+    })(Base);
+    Derived2 = (function(superClass) {
+      extend1(Derived2, superClass);
+
+      function Derived2() {
+        return Derived2.__super__.constructor.apply(this, arguments);
+      }
+
+      Derived2.reopen('hash', {
+        baz: 3
+      });
+
+      return Derived2;
+
+    })(Derived1);
+    OtherDerived1 = (function(superClass) {
+      extend1(OtherDerived1, superClass);
+
+      function OtherDerived1() {
+        return OtherDerived1.__super__.constructor.apply(this, arguments);
+      }
+
+      OtherDerived1.reopen('hash', {
+        qux: 4
+      });
+
+      OtherDerived1.reopen('array', []);
+
+      return OtherDerived1;
+
+    })(Base);
+    OtherDerived2 = (function(superClass) {
+      extend1(OtherDerived2, superClass);
+
+      function OtherDerived2() {
+        return OtherDerived2.__super__.constructor.apply(this, arguments);
+      }
+
+      OtherDerived2.reopen('array', [1]);
+
+      return OtherDerived2;
+
+    })(OtherDerived1);
+    expect(Derived1.__super__).not.toBe(Base.prototype);
+    expect(Derived2.__super__).not.toBe(Derived1.prototype);
+    expect(OtherDerived1.__super__).not.toBe(Base.prototype);
+    expect(OtherDerived2.__super__).not.toBe(OtherDerived1.prototype);
+    expect(Derived1.__super__.hash).toBe(Base.prototype.hash);
+    expect(OtherDerived1.__super__.hash).toBe(Base.prototype.hash);
+    expect(Derived2.__super__.hash).toBe(Derived1.prototype.hash);
+    expect(OtherDerived1.prototype.array).toEqual([]);
+    return expect(OtherDerived2.prototype.array).toEqual([1]);
+  });
+  describe('through reopenArray', function() {
+    return it('should set empty array when it is not defined', function() {
+      var Foo;
+      Foo = (function() {
+        function Foo() {}
+
+        Foo.reopenArray('array');
+
+        return Foo;
+
+      })();
+      return expect(Foo.prototype.array).toEqual([]);
+    });
+  });
+  return describe('through reopenObject', function() {
+    return it('should set empty object when it is not defined', function() {
+      var Foo;
+      Foo = (function() {
+        function Foo() {}
+
+        Foo.reopenObject('object', {
+          val: 1
+        });
+
+        return Foo;
+
+      })();
+      return expect(Foo.prototype.object).toEqual({
+        val: 1
+      });
+    });
   });
 });

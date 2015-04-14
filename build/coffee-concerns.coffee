@@ -28,18 +28,10 @@
       @concerns = []
       @concernsOwner = @
   
-    if not hasConcerns or not hasOwnConcerns
-      if @__super__
-        copy = extend({}, @__super__)
-        copy.constructor = @__super__.constructor
-        @__super__ = copy
-      else
-        @__super__ = {}
-  
     ClassMembers    = Concern.ClassMembers
     InstanceMembers = Concern.InstanceMembers or Concern
     _class = @
-    _super = @__super__
+    _super = copySuper(@)
     _proto = @::
   
     if ClassMembers
@@ -60,8 +52,10 @@
   
       if bothPlainObjects(prevVal, nextVal)
         nextVal = extend({}, prevVal, nextVal)
+  
       else if bothArrays(prevVal, nextVal)
         nextVal = [].concat(prevVal, nextVal)
+  
       else
         prevVal = nextVal
   
@@ -72,38 +66,59 @@
   
     if included = Concern.included
       included.call(Concern, @)
-  
     @
   
   reopen = (prop, modifier) ->
     proto = @::
     value = proto[prop]
+    isSet = proto[prop]?
   
-    isSet = value isnt undefined and value isnt null
+    isObj = isSet and isPlainObject(value)
+    isArr = isSet and !isObj and isArray(value)
   
     if isSet
-      isObj = isSet and isPlainObject(value)
-      isArr = isSet and !isObj and isArray(value)
+      copySuper(@)[prop] = value
   
-      return value unless isObj or isArr
-  
+    if isObj or isArr
       unless hasOwnProp.call(proto, prop)
         value = proto[prop] = clone(value)
   
       if modifier
+        # Modify value inside a function
         if isFunction(modifier)
           modifier.call(value, value)
   
+        # Extend value with new properties
         else if isPlainObject(modifier)
           extend(value, modifier) if isObj
   
+        # Push new items into value
         else if isArray(modifier)
-          arrayPush.apply(value, modifier) if isArr
+          push.apply(value, modifier) if isArr
   
-    else
+    else if modifier
       proto[prop] = modifier
   
     value
+  
+  reopenArray = (prop) ->
+    @::[prop] ||= []
+    @reopen arguments...
+  
+  reopenObject = (prop) ->
+    @::[prop] ||= {}
+    @reopen arguments...
+  
+  copySuper = (obj) ->
+    if obj.superCopier isnt obj
+      if obj.__super__
+        copy = extend({}, obj.__super__)
+        copy.constructor = obj.__super__.constructor
+        obj.__super__ = copy
+      else
+        obj.__super__ = {}
+      obj.superCopier = obj
+    obj.__super__
   
   tabooMembers  = ['included', 'ClassMembers']
   isFunction    = _.isFunction
@@ -112,7 +127,7 @@
   extend        = _.extend
   clone         = _.clone
   hasOwnProp    = {}.hasOwnProperty
-  arrayPush     = [].push
+  push          = [].push
   
   bothPlainObjects = (obj, other) ->
     isPlainObject(obj) and isPlainObject(other)
@@ -126,9 +141,8 @@
   includes = (Concern) ->
     !!@concerns and Concern in @concerns
   
-  Object.defineProperty Function::, 'include',  value: include
-  Object.defineProperty Function::, 'reopen',   value: reopen
-  Object.defineProperty Function::, 'includes', value: includes
+  for prop, value of {include, includes, reopen, reopenArray, reopenObject}
+    Object.defineProperty Function::, prop, {value}
   
   return
 )
