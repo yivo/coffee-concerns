@@ -4,13 +4,15 @@
 
   (function(root, factory) {
     if (typeof define === 'function' && define.amd) {
-      return define(['lodash'], factory);
+      return define(['lodash'], function(_) {
+        return factory(root, _);
+      });
     } else if (typeof module === 'object' && typeof module.exports === 'object') {
-      return module.exports = factory(require('lodash'));
+      return factory(root, require('lodash'));
     } else {
-      return factory(root._);
+      return factory(root, root._);
     }
-  })(this, function(_) {
+  })(this, function(root, _) {
     var bothArrays, bothFunctions, bothPlainObjects, clone, copySuper, extend, hasOwnProp, include, includes, isArray, isFunction, isPlainObject, prop, push, ref, reopen, reopenArray, reopenObject, tabooMembers, value;
     include = function(Concern) {
       var ClassMembers, InstanceMembers, _class, _proto, _super, hasConcerns, hasOwnConcerns, included, nextVal, prevVal, prop;

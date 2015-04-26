@@ -2,15 +2,20 @@ gulp       = require 'gulp'
 coffee     = require 'gulp-coffee'
 concat     = require 'gulp-concat'
 iife       = require 'gulp-iife'
+plumber    = require 'gulp-plumber'
 del        = require 'del'
 
 gulp.task 'default', ->
   gulp.start 'build'
 
+dependencies = [
+  name: 'lodash', as: '_'
+]
+
 gulp.task 'build', ->
-  dependencies = lodash: '_'
   gulp.src('source/coffee-concerns.coffee')
-    .pipe iife {type: 'coffee', dependencies}
+    .pipe plumber()
+    .pipe iife {dependencies}
     .pipe gulp.dest('build')
     .pipe coffee()
     .pipe concat('coffee-concerns.js')

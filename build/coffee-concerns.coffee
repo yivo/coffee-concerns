@@ -1,12 +1,12 @@
 ((root, factory) ->
   if typeof define is 'function' and define.amd
-    define(['lodash'], factory)
+    define ['lodash'], (_) ->
+      factory(root, _)
   else if typeof module is 'object' && typeof module.exports is 'object'
-    module.exports = factory(require('lodash'))
+    factory(root, require('lodash'))
   else
-    factory(root._)
-)(@, (_) ->
-
+    factory(root, root._)
+)(this, (root, _) ->
   include = (Concern) ->
     unless isPlainObject(Concern)
       throw new Error "
