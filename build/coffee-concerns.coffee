@@ -6,6 +6,7 @@
     factory(root, require('lodash'))
   else
     factory(root, root._)
+  return
 )(this, (root, _) ->
   include = (Concern) ->
     unless isPlainObject(Concern)
@@ -141,8 +142,9 @@
   includes = (Concern) ->
     !!@concerns and Concern in @concerns
   
-  for prop, value of {include, includes, reopen, reopenArray, reopenObject}
+  for prop, value of {include, includes, reopen, reopenArray, reopenObject} when not Function::[prop]
     Object.defineProperty Function::, prop, {value}
   
+  return
   return
 )

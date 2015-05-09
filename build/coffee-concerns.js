@@ -4,13 +4,13 @@
 
   (function(root, factory) {
     if (typeof define === 'function' && define.amd) {
-      return define(['lodash'], function(_) {
+      define(['lodash'], function(_) {
         return factory(root, _);
       });
     } else if (typeof module === 'object' && typeof module.exports === 'object') {
-      return factory(root, require('lodash'));
+      factory(root, require('lodash'));
     } else {
-      return factory(root, root._);
+      factory(root, root._);
     }
   })(this, function(root, _) {
     var bothArrays, bothFunctions, bothPlainObjects, clone, copySuper, extend, hasOwnProp, include, includes, isArray, isFunction, isPlainObject, prop, push, ref, reopen, reopenArray, reopenObject, tabooMembers, value;
@@ -160,10 +160,13 @@
     };
     for (prop in ref) {
       value = ref[prop];
-      Object.defineProperty(Function.prototype, prop, {
-        value: value
-      });
+      if (!Function.prototype[prop]) {
+        Object.defineProperty(Function.prototype, prop, {
+          value: value
+        });
+      }
     }
+    return;
   });
 
 }).call(this);
