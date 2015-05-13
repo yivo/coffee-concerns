@@ -1,9 +1,9 @@
 ((root, factory) ->
   if typeof define is 'function' and define.amd
-    define ['lodash'], (_) ->
+    define ['lodash', 'yess'], (_) ->
       factory(root, _)
   else if typeof module is 'object' && typeof module.exports is 'object'
-    factory(root, require('lodash'))
+    factory(root, require('lodash'), require('yess'))
   else
     factory(root, root._)
   return
@@ -99,32 +99,40 @@
     this
   
   reopen = (prop, modifier) ->
-    proto = @::
+    proto = this::
     value = proto[prop]
-    isSet = proto[prop]?
-  
+    isSet = value?
     isObj = isSet and isPlainObject(value)
     isArr = isSet and !isObj and isArray(value)
   
     if isSet
-      copySuper(@)[prop] = value
+      copySuper(this)[prop] = value
   
     if isObj or isArr
       unless hasOwnProp.call(proto, prop)
         value = proto[prop] = clone(value)
   
       if modifier
+  
         # Modify value inside a function
         if isFunction(modifier)
           modifier.call(value, value)
   
         # Extend value with new properties
         else if isPlainObject(modifier)
-          extend(value, modifier) if isObj
+          if isObj
+            extend(value, modifier)
+          else if isArr
+            value.push(value)
   
         # Push new items into value
-        else if isArray(modifier)
-          push.apply(value, modifier) if isArr
+        else if isArr
+          if isArray(modifier)
+            value.push.apply(value, modifier)
+  
+          else if arguments.length > 2
+            for i in [2...arguments.length]
+              value.push(arguments[i])
   
     else if modifier
       proto[prop] = modifier
@@ -139,41 +147,20 @@
     @::[prop] ||= {}
     @reopen arguments...
   
-  copySuper = (obj) ->
-    if obj.superCopier isnt obj
-      if obj.__super__
-        copy = extend({}, obj.__super__)
-        copy.constructor = obj.__super__.constructor
-        obj.__super__ = copy
-      else
-        obj.__super__ = {}
-      obj.superCopier = obj
-    obj.__super__
-  
   tabooMembers  = ['included', 'ClassMembers']
-  isFunction    = _.isFunction
-  isArray       = _.isArray
-  isPlainObject = _.isPlainObject
-  extend        = _.extend
-  clone         = _.clone
   hasOwnProp    = {}.hasOwnProperty
-  push          = [].push
+  {isFunction, isArray, isPlainObject, extend, clone, copySuper} = _
   
   bothPlainObjects = (obj, other) ->
     !!obj and !!other and isPlainObject(obj) and isPlainObject(other)
   
-  bothFunctions = (obj, other) ->
-    !!obj and !!other and isFunction(obj) and isFunction(other)
-  
   bothArrays = (obj, other) ->
-    isArray(obj) and isArray(other)
+    !!obj and !!other and isArray(obj) and isArray(other)
   
   includes = (Concern) ->
     !!@concerns and Concern in @concerns
   
   for prop, value of {include, includes, reopen, reopenArray, reopenObject} when not Function::[prop]
     Object.defineProperty Function::, prop, {value}
-  
-  return
   return
 )

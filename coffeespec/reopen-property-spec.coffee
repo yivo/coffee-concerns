@@ -1,5 +1,3 @@
-require '../build/coffee-concerns.js'
-
 describe 'Property when reopened', ->
 
   extend = (base, objs...) ->

@@ -1,5 +1,3 @@
-require '../build/coffee-concerns.js'
-
 describe 'Included concerns', ->
 
   it 'should be set correctly', ->

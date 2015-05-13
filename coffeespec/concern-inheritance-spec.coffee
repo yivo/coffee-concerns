@@ -1,5 +1,3 @@
-require '../build/coffee-concerns.js'
-
 describe 'Concern when inherited', ->
 
   Concern =

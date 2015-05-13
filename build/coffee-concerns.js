@@ -4,16 +4,16 @@
 
   (function(root, factory) {
     if (typeof define === 'function' && define.amd) {
-      define(['lodash'], function(_) {
+      define(['lodash', 'yess'], function(_) {
         return factory(root, _);
       });
     } else if (typeof module === 'object' && typeof module.exports === 'object') {
-      factory(root, require('lodash'));
+      factory(root, require('lodash'), require('yess'));
     } else {
       factory(root, root._);
     }
   })(this, function(root, _) {
-    var bothArrays, bothFunctions, bothPlainObjects, clone, copySuper, extend, hasOwnProp, include, includes, isArray, isFunction, isPlainObject, prop, push, ref, reopen, reopenArray, reopenObject, tabooMembers, value;
+    var bothArrays, bothPlainObjects, clone, copySuper, extend, hasOwnProp, include, includes, isArray, isFunction, isPlainObject, prop, ref, reopen, reopenArray, reopenObject, tabooMembers, value;
     include = function(Concern) {
       var ClassMembers, InstanceMembers, _class, _proto, _super, hasConcerns, hasOwnConcerns, included, nextVal, prevVal, prop;
       if (!isPlainObject(Concern)) {
@@ -70,10 +70,10 @@
       return this;
     };
     reopen = function(prop, modifier) {
-      var isArr, isObj, isSet, proto, value;
+      var i, isArr, isObj, isSet, j, proto, ref, value;
       proto = this.prototype;
       value = proto[prop];
-      isSet = proto[prop] != null;
+      isSet = value != null;
       isObj = isSet && isPlainObject(value);
       isArr = isSet && !isObj && isArray(value);
       if (isSet) {
@@ -89,10 +89,16 @@
           } else if (isPlainObject(modifier)) {
             if (isObj) {
               extend(value, modifier);
+            } else if (isArr) {
+              value.push(value);
             }
-          } else if (isArray(modifier)) {
-            if (isArr) {
-              push.apply(value, modifier);
+          } else if (isArr) {
+            if (isArray(modifier)) {
+              value.push.apply(value, modifier);
+            } else if (arguments.length > 2) {
+              for (i = j = 2, ref = arguments.length; 2 <= ref ? j < ref : j > ref; i = 2 <= ref ? ++j : --j) {
+                value.push(arguments[i]);
+              }
             }
           }
         }
@@ -111,36 +117,14 @@
       (base = this.prototype)[prop] || (base[prop] = {});
       return this.reopen.apply(this, arguments);
     };
-    copySuper = function(obj) {
-      var copy;
-      if (obj.superCopier !== obj) {
-        if (obj.__super__) {
-          copy = extend({}, obj.__super__);
-          copy.constructor = obj.__super__.constructor;
-          obj.__super__ = copy;
-        } else {
-          obj.__super__ = {};
-        }
-        obj.superCopier = obj;
-      }
-      return obj.__super__;
-    };
     tabooMembers = ['included', 'ClassMembers'];
-    isFunction = _.isFunction;
-    isArray = _.isArray;
-    isPlainObject = _.isPlainObject;
-    extend = _.extend;
-    clone = _.clone;
     hasOwnProp = {}.hasOwnProperty;
-    push = [].push;
+    isFunction = _.isFunction, isArray = _.isArray, isPlainObject = _.isPlainObject, extend = _.extend, clone = _.clone, copySuper = _.copySuper;
     bothPlainObjects = function(obj, other) {
       return !!obj && !!other && isPlainObject(obj) && isPlainObject(other);
     };
-    bothFunctions = function(obj, other) {
-      return !!obj && !!other && isFunction(obj) && isFunction(other);
-    };
     bothArrays = function(obj, other) {
-      return isArray(obj) && isArray(other);
+      return !!obj && !!other && isArray(obj) && isArray(other);
     };
     includes = function(Concern) {
       return !!this.concerns && indexOf.call(this.concerns, Concern) >= 0;
@@ -160,7 +144,6 @@
         });
       }
     }
-    return;
   });
 
 }).call(this);

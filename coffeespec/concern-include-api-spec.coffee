@@ -1,5 +1,3 @@
-require '../build/coffee-concerns.js'
-
 describe 'Concern include API', ->
   describe 'ClassMembers and InstanceMembers', ->
     it 'should correctly extend target', ->

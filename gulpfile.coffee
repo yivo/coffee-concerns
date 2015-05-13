@@ -9,7 +9,8 @@ gulp.task 'default', ->
   gulp.start 'build'
 
 dependencies = [
-  name: 'lodash', as: '_'
+  {require: 'lodash', global: '_'}
+  {require: 'yess'}
 ]
 
 gulp.task 'build', ->
