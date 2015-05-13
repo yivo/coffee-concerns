@@ -36,20 +36,14 @@
       ClassMembers = Concern.ClassMembers;
       InstanceMembers = Concern.InstanceMembers || Concern;
       _class = this;
-      _super = copySuper(this);
       _proto = this.prototype;
+      _super = copySuper(this);
       if (ClassMembers) {
         for (prop in ClassMembers) {
           if (!hasProp.call(ClassMembers, prop)) continue;
           nextVal = ClassMembers[prop];
           prevVal = _class[prop];
-          if (bothPlainObjects(prevVal, nextVal)) {
-            _class[prop] = extend({}, prevVal, nextVal);
-          } else if (bothArrays(prevVal, nextVal)) {
-            _class[prop] = [].concat(prevVal, nextVal);
-          } else {
-            _class[prop] = nextVal;
-          }
+          _class[prop] = bothPlainObjects(prevVal, nextVal) ? extend({}, prevVal, nextVal) : bothArrays(prevVal, nextVal) ? [].concat(prevVal, nextVal) : nextVal;
         }
       }
       for (prop in InstanceMembers) {
@@ -140,10 +134,10 @@
     hasOwnProp = {}.hasOwnProperty;
     push = [].push;
     bothPlainObjects = function(obj, other) {
-      return isPlainObject(obj) && isPlainObject(other);
+      return !!obj && !!other && isPlainObject(obj) && isPlainObject(other);
     };
     bothFunctions = function(obj, other) {
-      return isFunction(obj) && isFunction(other);
+      return !!obj && !!other && isFunction(obj) && isFunction(other);
     };
     bothArrays = function(obj, other) {
       return isArray(obj) && isArray(other);

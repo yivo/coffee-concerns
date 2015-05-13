@@ -3,44 +3,72 @@ include = (Concern) ->
     throw new Error "
       Concern must be plain object.
       You gave: #{Concern}.
-      Class you tried to include in: #{@name or @}
+      Class you tried to include in: #{@name or this}
     "
 
+  # We will keep array of included concerns in class member 'concerns'
+  # True if class has at least one concerns included
   hasConcerns    = !!@concerns
-  hasOwnConcerns = hasConcerns and @concernsOwner is @
 
-  return @ if hasConcerns and Concern in @concerns
+  # True if class did set own copy array of concerns
+  # so class ancestors will not access parent class concerns array
+  hasOwnConcerns = hasConcerns and @concernsOwner is this
+
+  # Do not include concern twice
+  return this if hasConcerns and Concern in @concerns
 
   if hasConcerns
+    # Set own copy array of concerns if it is necessary
     unless hasOwnConcerns
-      @concerns = [].concat(@concerns)
-      @concernsOwner = @
+      @concerns      = [].concat(@concerns)
+      @concernsOwner = this
   else
-    @concerns = []
-    @concernsOwner = @
+    # Process initial setup for concerns-friendly class
+    @concerns      = []
+    @concernsOwner = this
 
+  # Reference to concern members
   ClassMembers    = Concern.ClassMembers
   InstanceMembers = Concern.InstanceMembers or Concern
-  _class = @
-  _super = copySuper(@)
-  _proto = @::
 
+  # Reference to class namespace, for intelligibility
+  _class          = this
+
+  # Reference to class prototype, for intelligibility
+  _proto          = this::
+
+  # Make and store a copy of class __super__
+  # so it's modifying will not affect parent class
+  _super          = copySuper(this)
+
+  # Include class members
   if ClassMembers
+    # 'prop'    - property name
+    # 'nextVal' - value of this property in concern class members
+    # 'prevVal' - value of this property in class (current)
     for own prop, nextVal of ClassMembers
       prevVal = _class[prop]
 
-      if bothPlainObjects(prevVal, nextVal)
-        _class[prop] = extend({}, prevVal, nextVal)
+      # Try to merge values. Only values of the same type can be merged
+      _class[prop] =
+        if bothPlainObjects(prevVal, nextVal)
+          extend({}, prevVal, nextVal)
 
-      else if bothArrays(prevVal, nextVal)
-        _class[prop] = [].concat(prevVal, nextVal)
+        else if bothArrays(prevVal, nextVal)
+          [].concat(prevVal, nextVal)
 
-      else
-        _class[prop] = nextVal
+        else nextVal
 
+  # 'prop'         - property name
+  # 'nextVal'      - value of this property in concern instance members
+  # 'prevVal'      - value of this property in class prototype (current)
+  # 'tabooMembers' - property names which must be not included.
+  #                  This refers to 'include' hook and 'ClassMembers' when
+  #                  instance members specified at concern root (instead of 'InstanceMembers')
   for own prop, nextVal of InstanceMembers when prop not in tabooMembers
     prevVal = _proto[prop]
 
+    # Try to merge values
     if bothPlainObjects(prevVal, nextVal)
       nextVal = extend({}, prevVal, nextVal)
 
@@ -48,6 +76,7 @@ include = (Concern) ->
       nextVal = [].concat(prevVal, nextVal)
 
     else
+      # This cheat allows you to override concern in future
       prevVal = nextVal
 
     _super[prop] = prevVal
@@ -56,8 +85,8 @@ include = (Concern) ->
   @concerns.push(Concern)
 
   if included = Concern.included
-    included.call(Concern, @)
-  @
+    included.call(Concern, this)
+  this
 
 reopen = (prop, modifier) ->
   proto = @::
@@ -121,10 +150,10 @@ hasOwnProp    = {}.hasOwnProperty
 push          = [].push
 
 bothPlainObjects = (obj, other) ->
-  isPlainObject(obj) and isPlainObject(other)
+  !!obj and !!other and isPlainObject(obj) and isPlainObject(other)
 
 bothFunctions = (obj, other) ->
-  isFunction(obj) and isFunction(other)
+  !!obj and !!other and isFunction(obj) and isFunction(other)
 
 bothArrays = (obj, other) ->
   isArray(obj) and isArray(other)
