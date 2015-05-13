@@ -1,6 +1,7 @@
 {
   "name": "coffee-concerns",
   "version": "1.0.0",
+  "main": "build/coffee-concerns.js",
   "authors": [
     "Yaroslav Konoplov <the.yivo@gmail.com>"
   ],
@@ -11,6 +12,11 @@
     "test",
     "tests",
     "spec",
-    "coffeespec"
-  ]
+    "coffeespec",
+    "gulpfile.*"
+  ],
+  "dependencies": {
+    "lodash": "^3.6.0",
+    "yess": "yivo/yess"
+  }
 }

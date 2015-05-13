@@ -10,7 +10,7 @@
     "type": "git",
     "url": "git://github.com/username/repository.git"
   },
-  "author": "Yaroslav Konoplov",
+  "author": "Yaroslav Konoplov <the.yivo@gmail.com>",
   "license": "MIT",
   "devDependencies": {
     "coffee-script": "^1.9.1",
