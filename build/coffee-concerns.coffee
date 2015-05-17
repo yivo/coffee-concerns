@@ -1,55 +1,57 @@
 ((root, factory) ->
   if typeof define is 'function' and define.amd
     define ['lodash', 'yess'], (_) ->
-      factory(root, _)
+      root.Concerns = factory(root, _)
   else if typeof module is 'object' && typeof module.exports is 'object'
-    factory(root, require('lodash'), require('yess'))
+    module.exports = factory(root, require('lodash'), require('yess'))
   else
-    factory(root, root._)
+    root.Concerns = factory(root, root._)
   return
 )(this, (root, _) ->
-  include = (Concern) ->
+  Concerns = {}
+  
+  Concerns.include = (Class, Concern) ->
     unless isPlainObject(Concern)
       throw new Error "
         Concern must be plain object.
         You gave: #{Concern}.
-        Class you tried to include in: #{@name or this}
+        Class you tried to include in: #{Class.name or Class}
       "
   
     # We will keep array of included concerns in class member 'concerns'
     # True if class has at least one concerns included
-    hasConcerns    = !!@concerns
+    hasConcerns    = !!Class.concerns
   
     # True if class did set own copy array of concerns
     # so class ancestors will not access parent class concerns array
-    hasOwnConcerns = hasConcerns and @concernsOwner is this
+    hasOwnConcerns = hasConcerns and Class.concernsOwner is Class
   
     # Do not include concern twice
-    return this if hasConcerns and Concern in @concerns
+    return Class if hasConcerns and Concern in Class.concerns
   
     if hasConcerns
       # Set own copy array of concerns if it is necessary
       unless hasOwnConcerns
-        @concerns      = [].concat(@concerns)
-        @concernsOwner = this
+        Class.concerns      = [].concat(Class.concerns)
+        Class.concernsOwner = Class
     else
       # Process initial setup for concerns-friendly class
-      @concerns      = []
-      @concernsOwner = this
+      Class.concerns      = []
+      Class.concernsOwner = Class
   
     # Reference to concern members
     ClassMembers    = Concern.ClassMembers
     InstanceMembers = Concern.InstanceMembers or Concern
   
     # Reference to class namespace, for intelligibility
-    _class          = this
+    _class          = Class
   
     # Reference to class prototype, for intelligibility
-    _proto          = this::
+    _proto          = Class::
   
     # Make and store a copy of class __super__
     # so it's modifying will not affect parent class
-    _super          = copySuper(this)
+    _super          = copySuper(Class)
   
     # Include class members
     if ClassMembers
@@ -92,21 +94,33 @@
       _super[prop] = prevVal
       _proto[prop] = nextVal
   
-    @concerns.push(Concern)
+    Class.concerns.push(Concern)
   
     if included = Concern.included
-      included.call(Concern, this)
-    this
+      included.call(Concern, Class)
+    Class
   
-  reopen = (prop, modifier) ->
-    proto = this::
+  Concerns.includes = (Class, Concern) ->
+    !!Class.concerns and Concern in Class.concerns
+  
+  tabooMembers  = ['included', 'ClassMembers']
+  hasOwnProp    = {}.hasOwnProperty
+  {isFunction, isArray, isPlainObject, extend, clone, copySuper} = _
+  
+  bothPlainObjects = (obj, other) ->
+    !!obj and !!other and isPlainObject(obj) and isPlainObject(other)
+  
+  bothArrays = (obj, other) ->
+    !!obj and !!other and isArray(obj) and isArray(other)
+  Concerns.reopen = (Class, prop, modifier) ->
+    proto = Class::
     value = proto[prop]
     isSet = value?
     isObj = isSet and isPlainObject(value)
     isArr = isSet and !isObj and isArray(value)
   
     if isSet
-      copySuper(this)[prop] = value
+      copySuper(Class)[prop] = value
   
     if isObj or isArr
       unless hasOwnProp.call(proto, prop)
@@ -139,28 +153,28 @@
   
     value
   
-  reopenArray = (prop) ->
-    @::[prop] ||= []
-    @reopen arguments...
+  Concerns.reopenArray = (Class, prop) ->
+    Class::[prop] ||= []
+    Concerns.reopen arguments...
   
-  reopenObject = (prop) ->
-    @::[prop] ||= {}
-    @reopen arguments...
+  Concerns.reopenObject = (Class, prop) ->
+    Class::[prop] ||= {}
+    Concerns.reopen arguments...
   
-  tabooMembers  = ['included', 'ClassMembers']
-  hasOwnProp    = {}.hasOwnProperty
   {isFunction, isArray, isPlainObject, extend, clone, copySuper} = _
+  hasOwnProp = {}.hasOwnProperty
   
-  bothPlainObjects = (obj, other) ->
-    !!obj and !!other and isPlainObject(obj) and isPlainObject(other)
+  {nativeSlice} = _
   
-  bothArrays = (obj, other) ->
-    !!obj and !!other and isArray(obj) and isArray(other)
+  define = (prop, func) ->
+    unless Function::[prop]
+      Object.defineProperty Function::, prop, value: ->
+        args = nativeSlice.call(arguments)
+        args.unshift(this)
+        func.apply(null, args)
   
-  includes = (Concern) ->
-    !!@concerns and Concern in @concerns
+  for own prop, func of Concerns when prop isnt 'extend'
+    define(prop, func)
   
-  for prop, value of {include, includes, reopen, reopenArray, reopenObject} when not Function::[prop]
-    Object.defineProperty Function::, prop, {value}
-  return
+  Concerns
 )

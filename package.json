@@ -20,6 +20,7 @@
     "gulp-concat": "^2.5.2",
     "gulp-iife": "git://github.com/yivo/gulp-iife",
     "gulp-plumber": "^1.0.0",
+    "gulp-preprocess": "^1.2.0",
     "jasmine": "^2.2.1"
   },
   "dependencies": {

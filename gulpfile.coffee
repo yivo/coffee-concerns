@@ -4,6 +4,7 @@ concat     = require 'gulp-concat'
 iife       = require 'gulp-iife'
 plumber    = require 'gulp-plumber'
 del        = require 'del'
+preprocess = require 'gulp-preprocess'
 
 gulp.task 'default', ->
   gulp.start 'build'
@@ -16,7 +17,8 @@ dependencies = [
 gulp.task 'build', ->
   gulp.src('source/coffee-concerns.coffee')
     .pipe plumber()
-    .pipe iife {dependencies}
+    .pipe preprocess()
+    .pipe iife {dependencies, global: 'Concerns'}
     .pipe gulp.dest('build')
     .pipe coffee()
     .pipe concat('coffee-concerns.js')

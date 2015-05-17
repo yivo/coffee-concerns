@@ -204,12 +204,12 @@ describe('Property when reopened', function() {
       Foo = (function() {
         function Foo() {}
 
-        Foo.reopenArray('array');
+        Foo.reopenArray('array', 1, 2, 3);
 
         return Foo;
 
       })();
-      return expect(Foo.prototype.array).toEqual([]);
+      return expect(Foo.prototype.array).toEqual([1, 2, 3]);
     });
   });
   return describe('through reopenObject', function() {

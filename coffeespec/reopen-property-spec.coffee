@@ -90,9 +90,9 @@ describe 'Property when reopened', ->
 
     it 'should set empty array when it is not defined', ->
       class Foo
-        @reopenArray 'array'
+        @reopenArray 'array', 1, 2, 3
 
-      expect(Foo::array).toEqual []
+      expect(Foo::array).toEqual [1, 2, 3]
 
   describe 'through reopenObject', ->
 

@@ -5,39 +5,40 @@
   (function(root, factory) {
     if (typeof define === 'function' && define.amd) {
       define(['lodash', 'yess'], function(_) {
-        return factory(root, _);
+        return root.Concerns = factory(root, _);
       });
     } else if (typeof module === 'object' && typeof module.exports === 'object') {
-      factory(root, require('lodash'), require('yess'));
+      module.exports = factory(root, require('lodash'), require('yess'));
     } else {
-      factory(root, root._);
+      root.Concerns = factory(root, root._);
     }
   })(this, function(root, _) {
-    var bothArrays, bothPlainObjects, clone, copySuper, extend, hasOwnProp, include, includes, isArray, isFunction, isPlainObject, prop, ref, reopen, reopenArray, reopenObject, tabooMembers, value;
-    include = function(Concern) {
+    var Concerns, bothArrays, bothPlainObjects, clone, copySuper, define, extend, func, hasOwnProp, isArray, isFunction, isPlainObject, nativeSlice, prop, tabooMembers;
+    Concerns = {};
+    Concerns.include = function(Class, Concern) {
       var ClassMembers, InstanceMembers, _class, _proto, _super, hasConcerns, hasOwnConcerns, included, nextVal, prevVal, prop;
       if (!isPlainObject(Concern)) {
-        throw new Error("Concern must be plain object. You gave: " + Concern + ". Class you tried to include in: " + (this.name || this));
+        throw new Error("Concern must be plain object. You gave: " + Concern + ". Class you tried to include in: " + (Class.name || Class));
       }
-      hasConcerns = !!this.concerns;
-      hasOwnConcerns = hasConcerns && this.concernsOwner === this;
-      if (hasConcerns && indexOf.call(this.concerns, Concern) >= 0) {
-        return this;
+      hasConcerns = !!Class.concerns;
+      hasOwnConcerns = hasConcerns && Class.concernsOwner === Class;
+      if (hasConcerns && indexOf.call(Class.concerns, Concern) >= 0) {
+        return Class;
       }
       if (hasConcerns) {
         if (!hasOwnConcerns) {
-          this.concerns = [].concat(this.concerns);
-          this.concernsOwner = this;
+          Class.concerns = [].concat(Class.concerns);
+          Class.concernsOwner = Class;
         }
       } else {
-        this.concerns = [];
-        this.concernsOwner = this;
+        Class.concerns = [];
+        Class.concernsOwner = Class;
       }
       ClassMembers = Concern.ClassMembers;
       InstanceMembers = Concern.InstanceMembers || Concern;
-      _class = this;
-      _proto = this.prototype;
-      _super = copySuper(this);
+      _class = Class;
+      _proto = Class.prototype;
+      _super = copySuper(Class);
       if (ClassMembers) {
         for (prop in ClassMembers) {
           if (!hasProp.call(ClassMembers, prop)) continue;
@@ -63,21 +64,33 @@
         _super[prop] = prevVal;
         _proto[prop] = nextVal;
       }
-      this.concerns.push(Concern);
+      Class.concerns.push(Concern);
       if (included = Concern.included) {
-        included.call(Concern, this);
+        included.call(Concern, Class);
       }
-      return this;
+      return Class;
     };
-    reopen = function(prop, modifier) {
+    Concerns.includes = function(Class, Concern) {
+      return !!Class.concerns && indexOf.call(Class.concerns, Concern) >= 0;
+    };
+    tabooMembers = ['included', 'ClassMembers'];
+    hasOwnProp = {}.hasOwnProperty;
+    isFunction = _.isFunction, isArray = _.isArray, isPlainObject = _.isPlainObject, extend = _.extend, clone = _.clone, copySuper = _.copySuper;
+    bothPlainObjects = function(obj, other) {
+      return !!obj && !!other && isPlainObject(obj) && isPlainObject(other);
+    };
+    bothArrays = function(obj, other) {
+      return !!obj && !!other && isArray(obj) && isArray(other);
+    };
+    Concerns.reopen = function(Class, prop, modifier) {
       var i, isArr, isObj, isSet, j, proto, ref, value;
-      proto = this.prototype;
+      proto = Class.prototype;
       value = proto[prop];
       isSet = value != null;
       isObj = isSet && isPlainObject(value);
       isArr = isSet && !isObj && isArray(value);
       if (isSet) {
-        copySuper(this)[prop] = value;
+        copySuper(Class)[prop] = value;
       }
       if (isObj || isArr) {
         if (!hasOwnProp.call(proto, prop)) {
@@ -107,43 +120,39 @@
       }
       return value;
     };
-    reopenArray = function(prop) {
+    Concerns.reopenArray = function(Class, prop) {
       var base;
-      (base = this.prototype)[prop] || (base[prop] = []);
-      return this.reopen.apply(this, arguments);
+      (base = Class.prototype)[prop] || (base[prop] = []);
+      return Concerns.reopen.apply(Concerns, arguments);
     };
-    reopenObject = function(prop) {
+    Concerns.reopenObject = function(Class, prop) {
       var base;
-      (base = this.prototype)[prop] || (base[prop] = {});
-      return this.reopen.apply(this, arguments);
+      (base = Class.prototype)[prop] || (base[prop] = {});
+      return Concerns.reopen.apply(Concerns, arguments);
     };
-    tabooMembers = ['included', 'ClassMembers'];
-    hasOwnProp = {}.hasOwnProperty;
     isFunction = _.isFunction, isArray = _.isArray, isPlainObject = _.isPlainObject, extend = _.extend, clone = _.clone, copySuper = _.copySuper;
-    bothPlainObjects = function(obj, other) {
-      return !!obj && !!other && isPlainObject(obj) && isPlainObject(other);
-    };
-    bothArrays = function(obj, other) {
-      return !!obj && !!other && isArray(obj) && isArray(other);
-    };
-    includes = function(Concern) {
-      return !!this.concerns && indexOf.call(this.concerns, Concern) >= 0;
-    };
-    ref = {
-      include: include,
-      includes: includes,
-      reopen: reopen,
-      reopenArray: reopenArray,
-      reopenObject: reopenObject
-    };
-    for (prop in ref) {
-      value = ref[prop];
+    hasOwnProp = {}.hasOwnProperty;
+    nativeSlice = _.nativeSlice;
+    define = function(prop, func) {
       if (!Function.prototype[prop]) {
-        Object.defineProperty(Function.prototype, prop, {
-          value: value
+        return Object.defineProperty(Function.prototype, prop, {
+          value: function() {
+            var args;
+            args = nativeSlice.call(arguments);
+            args.unshift(this);
+            return func.apply(null, args);
+          }
         });
       }
+    };
+    for (prop in Concerns) {
+      if (!hasProp.call(Concerns, prop)) continue;
+      func = Concerns[prop];
+      if (prop !== 'extend') {
+        define(prop, func);
+      }
     }
+    return Concerns;
   });
 
 }).call(this);
