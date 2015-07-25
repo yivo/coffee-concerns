@@ -23,7 +23,7 @@ Concerns.reopen = (Class, prop, modifier) ->
         if isObj
           extend(value, modifier)
         else if isArr
-          value.push(value)
+          value.push(modifier)
 
       # Push new items into value
       else if isArr

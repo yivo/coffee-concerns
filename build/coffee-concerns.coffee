@@ -7,7 +7,7 @@
   else
     root.Concerns = factory(root, root._)
   return
-)(this, (root, _) ->
+)(this, (__root__, _) ->
   Concerns = {}
   
   Concerns.include = (Class, Concern) ->
@@ -137,7 +137,7 @@
           if isObj
             extend(value, modifier)
           else if isArr
-            value.push(value)
+            value.push(modifier)
   
         # Push new items into value
         else if isArr

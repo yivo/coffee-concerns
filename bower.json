@@ -2,8 +2,9 @@
   "name": "coffee-concerns",
   "version": "1.0.0",
   "main": "build/coffee-concerns.js",
+  "description": "Concern pattern for CoffeeScript",
   "authors": [
-    "Yaroslav Konoplov <the.yivo@gmail.com>"
+    "Yaroslav Konoplov <yaroslav@inbox.com>"
   ],
   "license": "MIT",
   "ignore": [

@@ -1,16 +1,16 @@
 {
   "name": "coffee-concerns",
   "version": "1.0.0",
-  "description": "Concern and Interface patterns for CoffeeScript",
+  "description": "Concern pattern for CoffeeScript",
   "main": "build/coffee-concerns.js",
   "scripts": {
     "test": "gulp build && gulp coffeespec && jasmine"
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/username/repository.git"
+    "url": "git://github.com/yivo/coffee-concerns.git"
   },
-  "author": "Yaroslav Konoplov <the.yivo@gmail.com>",
+  "author": "Yaroslav Konoplov <yaroslav@inbox.com>",
   "license": "MIT",
   "devDependencies": {
     "coffee-script": "^1.9.1",
@@ -18,13 +18,13 @@
     "gulp": "^3.8.11",
     "gulp-coffee": "^2.3.1",
     "gulp-concat": "^2.5.2",
-    "gulp-iife": "git://github.com/yivo/gulp-iife",
+    "gulp-iife": "yivo/gulp-iife",
     "gulp-plumber": "^1.0.0",
     "gulp-preprocess": "^1.2.0",
     "jasmine": "^2.2.1"
   },
   "dependencies": {
-    "lodash": "^3.6.0",
+    "lodash": "^3.10.0",
     "yess": "yivo/yess"
   }
 }

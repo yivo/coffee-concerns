@@ -12,7 +12,7 @@
     } else {
       root.Concerns = factory(root, root._);
     }
-  })(this, function(root, _) {
+  })(this, function(__root__, _) {
     var Concerns, bothArrays, bothPlainObjects, clone, copySuper, define, extend, func, hasOwnProp, isArray, isFunction, isPlainObject, nativeSlice, prop, tabooMembers;
     Concerns = {};
     Concerns.include = function(Class, Concern) {
@@ -103,7 +103,7 @@
             if (isObj) {
               extend(value, modifier);
             } else if (isArr) {
-              value.push(value);
+              value.push(modifier);
             }
           } else if (isArr) {
             if (isArray(modifier)) {
