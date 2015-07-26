@@ -1,6 +1,6 @@
 {
   "name": "coffee-concerns",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "build/coffee-concerns.js",
   "description": "Concern pattern for CoffeeScript",
   "authors": [
