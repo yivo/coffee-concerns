@@ -17,8 +17,8 @@
     Concerns = {};
     Concerns.include = function(Class, Concern) {
       var ClassMembers, InstanceMembers, _class, _proto, _super, hasConcerns, hasOwnConcerns, included, nextVal, prevVal, prop;
-      if (!isPlainObject(Concern)) {
-        throw new Error("Concern must be plain object. You gave: " + Concern + ". Class you tried to include in: " + (Class.name || Class));
+      if (Concern === null || typeof Concern !== 'object') {
+        throw new Error("Concern must be object. You gave: " + Concern + ". Class you tried to include in: " + (Class.name || Class));
       }
       hasConcerns = !!Class.concerns;
       hasOwnConcerns = hasConcerns && Class.concernsOwner === Class;

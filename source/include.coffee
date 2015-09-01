@@ -1,7 +1,7 @@
 Concerns.include = (Class, Concern) ->
-  unless isPlainObject(Concern)
+  if Concern is null or typeof Concern isnt 'object'
     throw new Error "
-      Concern must be plain object.
+      Concern must be object.
       You gave: #{Concern}.
       Class you tried to include in: #{Class.name or Class}
     "
