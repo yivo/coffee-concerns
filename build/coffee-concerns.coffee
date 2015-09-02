@@ -11,12 +11,8 @@
   Concerns = {}
   
   Concerns.include = (Class, Concern) ->
-    if Concern is null or typeof Concern isnt 'object'
-      throw new Error "
-        Concern must be object.
-        You gave: #{Concern}.
-        Class you tried to include in: #{Class.name or Class}
-      "
+    checkClass(Class)
+    checkConcern(Concern)
   
     # We will keep array of included concerns in class member 'concerns'
     # True if class has at least one concerns included
@@ -47,7 +43,7 @@
     _class          = Class
   
     # Reference to class prototype, for intelligibility
-    _proto          = Class::
+    _proto          = Class.prototype
   
     # Make and store a copy of class __super__
     # so it's modifying will not affect parent class
@@ -63,7 +59,7 @@
   
         # Try to merge values. Only values of the same type can be merged
         _class[prop] =
-          if bothPlainObjects(prevVal, nextVal)
+          if bothObjects(prevVal, nextVal)
             extend({}, prevVal, nextVal)
   
           else if bothArrays(prevVal, nextVal)
@@ -81,7 +77,7 @@
       prevVal = _proto[prop]
   
       # Try to merge values
-      if bothPlainObjects(prevVal, nextVal)
+      if bothObjects(prevVal, nextVal)
         nextVal = extend({}, prevVal, nextVal)
   
       else if bothArrays(prevVal, nextVal)
@@ -103,77 +99,60 @@
   Concerns.includes = (Class, Concern) ->
     !!Class.concerns and Concern in Class.concerns
   
+  Concerns.extend = (object, Concern) ->
+    checkObject(object)
+    checkConcern(Concern)
+    for own prop, value of Concern.InstanceMembers or Concern
+      if prop not in tabooMembers
+        object[prop] = value
+    object
+  
+  checkObject = (object) ->
+    unless isObject(object)
+      throw new Error "
+        [CoffeeConcerns] Concern can extend only objects.
+        You gave: #{object}
+      "
+  
+  checkClass = (Class) ->
+    unless isFunction(Class)
+      throw new Error "
+        [CoffeeConcerns] Concern can be included only in class (function).
+        You gave: #{Class}
+      "
+  
+  checkConcern = (Concern) ->
+    unless isObject(Concern)
+      throw new Error "
+        [CoffeeConcerns] Concern must be object.
+        You gave: #{Concern}.
+      "
+  
   tabooMembers  = ['included', 'ClassMembers']
   hasOwnProp    = {}.hasOwnProperty
-  {isFunction, isArray, isPlainObject, extend, clone, copySuper} = _
+  {isFunction, isArray, extend, clone, copySuper} = _
   
-  bothPlainObjects = (obj, other) ->
-    !!obj and !!other and isPlainObject(obj) and isPlainObject(other)
+  isObject = (obj) ->
+    obj isnt null and typeof obj is 'object' and not isArray(obj)
+  
+  bothObjects = (obj, other) ->
+    !!obj and !!other and isObject(obj) and isObject(other)
   
   bothArrays = (obj, other) ->
     !!obj and !!other and isArray(obj) and isArray(other)
-  Concerns.reopen = (Class, prop, modifier) ->
-    proto = Class::
-    value = proto[prop]
-    isSet = value?
-    isObj = isSet and isPlainObject(value)
-    isArr = isSet and !isObj and isArray(value)
-  
-    if isSet
-      copySuper(Class)[prop] = value
-  
-    if isObj or isArr
-      unless hasOwnProp.call(proto, prop)
-        value = proto[prop] = clone(value)
-  
-      if modifier
-  
-        # Modify value inside a function
-        if isFunction(modifier)
-          modifier.call(value, value)
-  
-        # Extend value with new properties
-        else if isPlainObject(modifier)
-          if isObj
-            extend(value, modifier)
-          else if isArr
-            value.push(modifier)
-  
-        # Push new items into value
-        else if isArr
-          if isArray(modifier)
-            value.push.apply(value, modifier)
-  
-          else if arguments.length > 2
-            for i in [2...arguments.length]
-              value.push(arguments[i])
-  
-    else if modifier
-      proto[prop] = modifier
-  
-    value
-  
-  Concerns.reopenArray = (Class, prop) ->
-    Class::[prop] ||= []
-    Concerns.reopen arguments...
-  
-  Concerns.reopenObject = (Class, prop) ->
-    Class::[prop] ||= {}
-    Concerns.reopen arguments...
-  
-  {isFunction, isArray, isPlainObject, extend, clone, copySuper} = _
-  hasOwnProp = {}.hasOwnProperty
-  
-  {nativeSlice} = _
   
   define = (prop, func) ->
     unless Function::[prop]
+      _func = func
       Object.defineProperty Function::, prop, value: ->
-        args = nativeSlice.call(arguments)
+        length  = arguments.length
+        i       = -1
+        args    = Array(length)
+        args[i] = arguments[i] while ++i < length
         args.unshift(this)
-        func.apply(null, args)
+        _func.apply(null, args)
   
-  for own prop, func of Concerns when prop isnt 'extend'
+  for own prop, func of Concerns
     define(prop, func)
   
   Concerns
