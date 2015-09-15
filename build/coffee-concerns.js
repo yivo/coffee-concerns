@@ -13,7 +13,7 @@
       root.Concerns = factory(root, root._);
     }
   })(this, function(__root__, _) {
-    var Concerns, bothArrays, bothObjects, checkClass, checkConcern, checkObject, clone, copySuper, define, extend, func, hasOwnProp, isArray, isFunction, isObject, prop, tabooMembers;
+    var Concerns, bothArrays, bothObjects, checkClass, checkConcern, checkObject, clone, copySuper, extend, hasOwnProp, isArray, isFunction, isObject, tabooMembers;
     Concerns = {};
     Concerns.include = function(Class, Concern) {
       var ClassMembers, InstanceMembers, _class, _proto, _super, hasConcerns, hasOwnConcerns, included, nextVal, prevVal, prop;
@@ -113,30 +113,19 @@
     bothArrays = function(obj, other) {
       return !!obj && !!other && isArray(obj) && isArray(other);
     };
-    define = function(prop, func) {
-      var _func;
-      if (!Function.prototype[prop]) {
-        _func = func;
-        return Object.defineProperty(Function.prototype, prop, {
-          value: function() {
-            var args, i, length;
-            length = arguments.length;
-            i = -1;
-            args = Array(length);
-            while (++i < length) {
-              args[i] = arguments[i];
-            }
-            args.unshift(this);
-            return _func.apply(null, args);
-          }
-        });
+    Function.include || Object.defineProperty(Function.prototype, 'include', {
+      value: function() {
+        var args, i, length;
+        length = arguments.length;
+        i = -1;
+        args = Array(length);
+        while (++i < length) {
+          args[i] = arguments[i];
+        }
+        args.unshift(this);
+        return Concerns.include.apply(Concerns, args);
       }
-    };
-    for (prop in Concerns) {
-      if (!hasProp.call(Concerns, prop)) continue;
-      func = Concerns[prop];
-      define(prop, func);
-    }
+    });
     return Concerns;
   });
 

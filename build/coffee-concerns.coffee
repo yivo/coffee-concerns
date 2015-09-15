@@ -141,19 +141,13 @@
   bothArrays = (obj, other) ->
     !!obj and !!other and isArray(obj) and isArray(other)
   
-  define = (prop, func) ->
-    unless Function::[prop]
-      _func = func
-      Object.defineProperty Function::, prop, value: ->
-        length  = arguments.length
-        i       = -1
-        args    = Array(length)
-        args[i] = arguments[i] while ++i < length
-        args.unshift(this)
-        _func.apply(null, args)
-  
-  for own prop, func of Concerns
-    define(prop, func)
+  Function.include || Object.defineProperty Function::, 'include', value: ->
+    length  = arguments.length
+    i       = -1
+    args    = Array(length)
+    args[i] = arguments[i] while ++i < length
+    args.unshift(this)
+    Concerns.include(args...)
   
   Concerns
 )
