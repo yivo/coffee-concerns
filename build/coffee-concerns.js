@@ -65,7 +65,7 @@
       }
       Class.concerns.push(Concern);
       if (included = Concern.included) {
-        included.call(Concern, Class);
+        included.call(Class, Class);
       }
       return Class;
     };

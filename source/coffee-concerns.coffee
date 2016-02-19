@@ -83,7 +83,7 @@ Concerns.include = (Class, Concern) ->
   Class.concerns.push(Concern)
 
   if included = Concern.included
-    included.call(Concern, Class)
+    included.call(Class, Class)
   Class
 
 Concerns.includes = (Class, Concern) ->
