@@ -2,17 +2,19 @@
   var indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
     hasProp = {}.hasOwnProperty;
 
-  (function(root, factory) {
+  (function(factory) {
+    var root;
+    root = typeof self === 'object' && (typeof self !== "undefined" && self !== null ? self.self : void 0) === self ? self : typeof global === 'object' && (typeof global !== "undefined" && global !== null ? global.global : void 0) === global ? global : void 0;
     if (typeof define === 'function' && define.amd) {
-      define(['lodash', 'yess'], function(_) {
+      define(['lodash', 'yess', 'exports'], function(_) {
         return root.Concerns = factory(root, _);
       });
-    } else if (typeof module === 'object' && typeof module.exports === 'object') {
+    } else if (typeof module === 'object' && module !== null && (module.exports != null) && typeof module.exports === 'object') {
       module.exports = factory(root, require('lodash'), require('yess'));
     } else {
       root.Concerns = factory(root, root._);
     }
-  })(this, function(__root__, _) {
+  })(function(__root__, _) {
     var Concerns, bothArrays, bothObjects, checkClass, checkConcern, checkObject, clone, copySuper, extend, hasOwnProp, isArray, isFunction, isObject, tabooMembers;
     Concerns = {};
     Concerns.include = function(Class, Concern) {

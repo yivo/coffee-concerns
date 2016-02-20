@@ -1,13 +1,31 @@
-((root, factory) ->
+((factory) ->
+
+  # Browser and WebWorker
+  root = if typeof self is 'object' and self?.self is self
+    self
+
+  # Server
+  else if typeof global is 'object' and global?.global is global
+    global
+
+  # AMD
   if typeof define is 'function' and define.amd
-    define ['lodash', 'yess'], (_) ->
+    define ['lodash', 'yess', 'exports'], (_) ->
       root.Concerns = factory(root, _)
-  else if typeof module is 'object' && typeof module.exports is 'object'
+
+  # CommonJS
+  else if typeof module is 'object' and module isnt null and
+          module.exports? and typeof module.exports is 'object'
     module.exports = factory(root, require('lodash'), require('yess'))
+
+  # Browser and the rest
   else
     root.Concerns = factory(root, root._)
+
+  # No return value
   return
-)(this, (__root__, _) ->
+
+)((__root__, _) ->
   Concerns = {}
   
   Concerns.include = (Class, Concern) ->
