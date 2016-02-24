@@ -1,5 +1,3 @@
-TODO: Update README
-
 # coffee-concerns
 Concern pattern for CoffeeScript
 
@@ -74,33 +72,6 @@ class IceCream extends Product
 Product::attributes   # => name: 'string', price: 'decimal'
 IceCream::attributes  # => name: 'string', price: 'decimal', calories: 'int', color: 'int'
 ```
-### Reopening properties
-Sometimes it is necessary to modify object but don't affect parents' object.
-See the problem and the solve below.
-```coffeescript
-# Assume we have this base class
-class Base
-  obj:
-    foo: 1
-    bar: 2
-
-class Derived extends base
-# We want to add `baz` and remove `foo` from obj
-
-# Manually do this:
-  # Copy the object by using lodash or underscore or custom extend
-  # and reassign it to own prototype
-  @::obj = _.extend({}, @::obj, baz: 3)
-  delete @::obj.foo
-
-# Do this by reopening property:
-  @reopen 'obj', ->
-    @baz = 3
-    delete @foo
-
-  # You can find previous value of `obj` in super: Derived.__super__.obj
-```
-You can reopen objects and array. Reopening other data types will cause in simple assignment.
 ### Check the complete example
 ```coffeescript
 PriceFormats =
