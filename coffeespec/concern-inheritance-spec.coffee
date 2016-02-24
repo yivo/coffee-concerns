@@ -21,14 +21,14 @@ describe 'Concern when inherited', ->
       @include Concern
     class Derived extends Base
 
-    expect(Base.__super__.method).toBe Concern.method
+    expect(Base.__super__.method).toBe(Concern.method)
 
-    expect(Derived::method).toBe Concern.method
-    expect(Derived::hash).toBe Concern.hash
-    expect(Derived::text).toBe Concern.text
-    expect(Derived.__super__.method).toBe Concern.method
-    expect(Derived.__super__.hash).toBe Concern.hash
-    expect(Derived.__super__.text).toBe Concern.text
+    expect(Derived::method).toBe(Concern.method)
+    expect(Derived::hash).toBe(Concern.hash)
+    expect(Derived::text).toBe(Concern.text)
+    expect(Derived.__super__.method).toBe(Concern.method)
+    expect(Derived.__super__.hash).toBe(Concern.hash)
+    expect(Derived.__super__.text).toBe(Concern.text)
 
   it 'should correctly override', ->
     class Base
@@ -45,12 +45,12 @@ describe 'Concern when inherited', ->
       @array: [2]
       @include Concern
 
-    expect(DerivedFoo.__super__.method).toBe Concern.method
-    expect(DerivedFoo.__super__.hash).toBe Base::hash
+    expect(DerivedFoo.__super__.method).toBe(Concern.method)
+    expect(DerivedFoo.__super__.hash).toBe(Base::hash)
     expect(DerivedFoo::hash).toEqual extend({}, Base::hash, Concern.hash)
 
-    expect(DerivedBar.__super__.method).toBe Concern.method
-    expect(DerivedBar.__super__.hash).toBe Base::hash
+    expect(DerivedBar.__super__.method).toBe(Concern.method)
+    expect(DerivedBar.__super__.hash).toBe(Base::hash)
     expect(DerivedBar::hash).toEqual extend({}, Base::hash, Concern.hash)
 
     expect(Base.array).toEqual [1]

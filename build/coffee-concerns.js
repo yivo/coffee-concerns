@@ -1,39 +1,74 @@
 (function() {
   var indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
-    hasProp = {}.hasOwnProperty;
+    hasProp = {}.hasOwnProperty,
+    extend1 = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   (function(factory) {
     var root;
     root = typeof self === 'object' && (typeof self !== "undefined" && self !== null ? self.self : void 0) === self ? self : typeof global === 'object' && (typeof global !== "undefined" && global !== null ? global.global : void 0) === global ? global : void 0;
     if (typeof define === 'function' && define.amd) {
-      define(['lodash', 'yess', 'exports'], function(_) {
+      define(['yess', 'lodash', 'exports'], function(_) {
         return root.Concerns = factory(root, _);
       });
     } else if (typeof module === 'object' && module !== null && (module.exports != null) && typeof module.exports === 'object') {
-      module.exports = factory(root, require('lodash'), require('yess'));
+      module.exports = factory(root, require('yess'), require('lodash'));
     } else {
       root.Concerns = factory(root, root._);
     }
   })(function(__root__, _) {
-    var Concerns, bothArrays, bothObjects, checkClass, checkConcern, checkObject, clone, copySuper, extend, hasOwnProp, isArray, isFunction, isObject, tabooMembers;
-    Concerns = {};
-    Concerns.include = function(Class, Concern) {
+    var BaseError, CoffeeConcerns, InvalidClass, InvalidConcern, InvalidInstance, TABOO_MEMBERS, bothArrays, bothObjects, checkClass, checkConcern, checkInstance, copySuper, extend, fn, isArray, isClass, isFunction, isObject, prefixErrorMessage;
+    checkInstance = function(instance) {
+      if (!isObject(instance)) {
+        throw new InvalidInstance(instance);
+      }
+      return true;
+    };
+    checkClass = function(Class) {
+      if (!isClass(Class)) {
+        throw new InvalidClass(Class);
+      }
+      return true;
+    };
+    checkConcern = function(Concern) {
+      if (!isObject(Concern)) {
+        throw new InvalidConcern(Concern);
+      }
+      return true;
+    };
+    TABOO_MEMBERS = ['included', 'ClassMembers'];
+    if (typeof Object.freeze === "function") {
+      Object.freeze(TABOO_MEMBERS);
+    }
+    isFunction = _.isFunction, isClass = _.isClass, isArray = _.isArray, extend = _.extend, copySuper = _.copySuper;
+    isObject = function(obj) {
+      return obj !== null && typeof obj === 'object' && !isArray(obj);
+    };
+    bothObjects = function(obj, other) {
+      return !!obj && !!other && isObject(obj) && isObject(other);
+    };
+    bothArrays = function(obj, other) {
+      return !!obj && !!other && isArray(obj) && isArray(other);
+    };
+    CoffeeConcerns = {
+      VERSION: '1.0.3'
+    };
+    CoffeeConcerns.include = function(Class, Concern) {
       var ClassMembers, InstanceMembers, _class, _proto, _super, hasConcerns, hasOwnConcerns, included, nextVal, prevVal, prop;
       checkClass(Class);
       checkConcern(Concern);
       hasConcerns = !!Class.concerns;
-      hasOwnConcerns = hasConcerns && Class.concernsOwner === Class;
+      hasOwnConcerns = hasConcerns && Class.concernsOf === Class;
       if (hasConcerns && indexOf.call(Class.concerns, Concern) >= 0) {
         return Class;
       }
       if (hasConcerns) {
         if (!hasOwnConcerns) {
           Class.concerns = [].concat(Class.concerns);
-          Class.concernsOwner = Class;
+          Class.concernsOf = Class;
         }
       } else {
         Class.concerns = [];
-        Class.concernsOwner = Class;
+        Class.concernsOf = Class;
       }
       ClassMembers = Concern.ClassMembers;
       InstanceMembers = Concern.InstanceMembers || Concern;
@@ -51,7 +86,7 @@
       for (prop in InstanceMembers) {
         if (!hasProp.call(InstanceMembers, prop)) continue;
         nextVal = InstanceMembers[prop];
-        if (!(indexOf.call(tabooMembers, prop) < 0)) {
+        if (!(indexOf.call(TABOO_MEMBERS, prop) < 0)) {
           continue;
         }
         prevVal = _proto[prop];
@@ -71,64 +106,93 @@
       }
       return Class;
     };
-    Concerns.includes = function(Class, Concern) {
+    CoffeeConcerns.includes = function(Class, Concern) {
       return !!Class.concerns && indexOf.call(Class.concerns, Concern) >= 0;
     };
-    Concerns.extend = function(object, Concern) {
+    CoffeeConcerns.extend = function(instance, Concern) {
       var prop, ref, value;
-      checkObject(object);
+      checkInstance(instance);
       checkConcern(Concern);
       ref = Concern.InstanceMembers || Concern;
       for (prop in ref) {
         if (!hasProp.call(ref, prop)) continue;
         value = ref[prop];
-        if (indexOf.call(tabooMembers, prop) < 0) {
-          object[prop] = value;
+        if (indexOf.call(TABOO_MEMBERS, prop) < 0) {
+          instance[prop] = value;
         }
       }
-      return object;
+      return instance;
     };
-    checkObject = function(object) {
-      if (!isObject(object)) {
-        throw new Error("[CoffeeConcerns] Concern can extend only objects. You gave: " + object);
-      }
-    };
-    checkClass = function(Class) {
-      if (!isFunction(Class)) {
-        throw new Error("[CoffeeConcerns] Concern can be included only in class (function). You gave: " + Class);
-      }
-    };
-    checkConcern = function(Concern) {
-      if (!isObject(Concern)) {
-        throw new Error("[CoffeeConcerns] Concern must be object. You gave: " + Concern + ".");
-      }
-    };
-    tabooMembers = ['included', 'ClassMembers'];
-    hasOwnProp = {}.hasOwnProperty;
-    isFunction = _.isFunction, isArray = _.isArray, extend = _.extend, clone = _.clone, copySuper = _.copySuper;
-    isObject = function(obj) {
-      return obj !== null && typeof obj === 'object' && !isArray(obj);
-    };
-    bothObjects = function(obj, other) {
-      return !!obj && !!other && isObject(obj) && isObject(other);
-    };
-    bothArrays = function(obj, other) {
-      return !!obj && !!other && isArray(obj) && isArray(other);
-    };
-    Function.include || Object.defineProperty(Function.prototype, 'include', {
-      value: function() {
-        var args, i, length;
-        length = arguments.length;
+    if (Function.include == null) {
+      fn = function() {
+        var args, i, l;
+        l = arguments.length;
         i = -1;
-        args = Array(length);
-        while (++i < length) {
-          args[i] = arguments[i];
+        args = [this];
+        while (++i < l) {
+          args.push(arguments[i]);
         }
-        args.unshift(this);
-        return Concerns.include.apply(Concerns, args);
+        return CoffeeConcerns.include.apply(CoffeeConcerns, args);
+      };
+      if (Object.defineProperty != null) {
+        Object.defineProperty(Function.prototype, 'include', {
+          value: fn
+        });
+      } else {
+        Function.prototype.include = fn;
       }
-    });
-    return Concerns;
+    }
+    prefixErrorMessage = function(msg) {
+      return "[CoffeeConcerns] " + msg;
+    };
+    BaseError = (function(superClass) {
+      extend1(BaseError, superClass);
+
+      function BaseError() {
+        BaseError.__super__.constructor.call(this, this.message);
+        (typeof Error.captureStackTrace === "function" ? Error.captureStackTrace(this, this.name) : void 0) || (this.stack = new Error().stack);
+      }
+
+      return BaseError;
+
+    })(Error);
+    InvalidClass = (function(superClass) {
+      extend1(InvalidClass, superClass);
+
+      function InvalidClass(Class) {
+        this.name = 'InvalidClass';
+        this.message = prefixErrorMessage("Concern can be included only in class (function). Got " + Class);
+        InvalidClass.__super__.constructor.apply(this, arguments);
+      }
+
+      return InvalidClass;
+
+    })(BaseError);
+    InvalidInstance = (function(superClass) {
+      extend1(InvalidInstance, superClass);
+
+      function InvalidInstance(instance) {
+        this.name = 'InvalidInstance';
+        this.message = prefixErrorMessage("Concern can extend only instance (object). Got " + instance);
+        InvalidInstance.__super__.constructor.apply(this, arguments);
+      }
+
+      return InvalidInstance;
+
+    })(BaseError);
+    InvalidConcern = (function(superClass) {
+      extend1(InvalidConcern, superClass);
+
+      function InvalidConcern(Concern) {
+        this.name = 'InvalidConcern';
+        this.message = prefixErrorMessage("Concern must be key-value object. Got " + Concern);
+        InvalidConcern.__super__.constructor.apply(this, arguments);
+      }
+
+      return InvalidConcern;
+
+    })(BaseError);
+    return CoffeeConcerns;
   });
 
 }).call(this);

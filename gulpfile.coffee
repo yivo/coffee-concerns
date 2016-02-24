@@ -9,23 +9,23 @@ preprocess = require 'gulp-preprocess'
 gulp.task 'default', ->
   gulp.start 'build'
 
-dependencies = [
-  {require: 'lodash', global: '_'}
-  {require: 'yess'}
-]
+dependencies = [{require: 'lodash'}, {require: 'yess', global: '_'}]
 
 gulp.task 'build', ->
-  gulp.src('source/coffee-concerns.coffee')
+  gulp.src('source/__manifest__.coffee')
     .pipe plumber()
     .pipe preprocess()
     .pipe iife {dependencies, global: 'Concerns'}
+    .pipe concat('coffee-concerns.coffee')
     .pipe gulp.dest('build')
     .pipe coffee()
     .pipe concat('coffee-concerns.js')
     .pipe gulp.dest('build')
 
 gulp.task 'coffeespec', ->
-  del.sync 'spec/**/*.js'
+  del.sync 'spec/**/*'
   gulp.src('coffeespec/**/*.coffee')
     .pipe coffee(bare: yes)
     .pipe gulp.dest('spec')
+  gulp.src('coffeespec/support/jasmine.json')
+    .pipe gulp.dest('spec/support')

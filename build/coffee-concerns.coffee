@@ -10,13 +10,13 @@
 
   # AMD
   if typeof define is 'function' and define.amd
-    define ['lodash', 'yess', 'exports'], (_) ->
+    define ['yess', 'lodash', 'exports'], (_) ->
       root.Concerns = factory(root, _)
 
   # CommonJS
   else if typeof module is 'object' and module isnt null and
           module.exports? and typeof module.exports is 'object'
-    module.exports = factory(root, require('lodash'), require('yess'))
+    module.exports = factory(root, require('yess'), require('lodash'))
 
   # Browser and the rest
   else
@@ -26,9 +26,35 @@
   return
 
 )((__root__, _) ->
-  Concerns = {}
+  checkInstance = (instance) ->
+    throw new InvalidInstance(instance) unless isObject(instance)
+    true
   
-  Concerns.include = (Class, Concern) ->
+  checkClass = (Class) ->
+    throw new InvalidClass(Class) unless isClass(Class)
+    true
+  
+  checkConcern = (Concern) ->
+    throw new InvalidConcern(Concern) unless isObject(Concern)
+    true
+  
+  TABOO_MEMBERS = ['included', 'ClassMembers']
+  Object.freeze?(TABOO_MEMBERS)
+  
+  {isFunction, isClass, isArray, extend, copySuper} = _
+  
+  isObject = (obj) ->
+    obj isnt null and typeof obj is 'object' and not isArray(obj)
+  
+  bothObjects = (obj, other) ->
+    !!obj and !!other and isObject(obj) and isObject(other)
+  
+  bothArrays = (obj, other) ->
+    !!obj and !!other and isArray(obj) and isArray(other)
+  
+  CoffeeConcerns = VERSION: '1.0.3'
+  
+  CoffeeConcerns.include = (Class, Concern) ->
     checkClass(Class)
     checkConcern(Concern)
   
@@ -38,7 +64,7 @@
   
     # True if class did set own copy array of concerns
     # so class ancestors will not access parent class concerns array
-    hasOwnConcerns = hasConcerns and Class.concernsOwner is Class
+    hasOwnConcerns = hasConcerns and Class.concernsOf is Class
   
     # Do not include concern twice
     return Class if hasConcerns and Concern in Class.concerns
@@ -47,11 +73,11 @@
       # Set own copy array of concerns if it is necessary
       unless hasOwnConcerns
         Class.concerns      = [].concat(Class.concerns)
-        Class.concernsOwner = Class
+        Class.concernsOf    = Class
     else
       # Process initial setup for concerns-friendly class
       Class.concerns      = []
-      Class.concernsOwner = Class
+      Class.concernsOf    = Class
   
     # Reference to concern members
     ClassMembers    = Concern.ClassMembers
@@ -85,13 +111,13 @@
   
           else nextVal
   
-    # 'prop'         - property name
-    # 'nextVal'      - value of this property in concern instance members
-    # 'prevVal'      - value of this property in class prototype (current)
-    # 'tabooMembers' - property names which must be not included.
-    #                  This refers to 'include' hook and 'ClassMembers' when
-    #                  instance members specified at concern root (instead of 'InstanceMembers')
-    for own prop, nextVal of InstanceMembers when prop not in tabooMembers
+    # 'prop'          - property name
+    # 'nextVal'       - value of this property in concern instance members
+    # 'prevVal'       - value of this property in class prototype (current)
+    # 'TABOO_MEMBERS' - property names which must be not included.
+    #                   This refers to 'include' hook and 'ClassMembers' when
+    #                   instance members specified at concern root (instead of 'InstanceMembers')
+    for own prop, nextVal of InstanceMembers when prop not in TABOO_MEMBERS
       prevVal = _proto[prop]
   
       # Try to merge values
@@ -114,59 +140,54 @@
       included.call(Class, Class)
     Class
   
-  Concerns.includes = (Class, Concern) ->
+  CoffeeConcerns.includes = (Class, Concern) ->
     !!Class.concerns and Concern in Class.concerns
   
-  Concerns.extend = (object, Concern) ->
-    checkObject(object)
+  CoffeeConcerns.extend = (instance, Concern) ->
+    checkInstance(instance)
     checkConcern(Concern)
     for own prop, value of Concern.InstanceMembers or Concern
-      if prop not in tabooMembers
-        object[prop] = value
-    object
+      instance[prop] = value if prop not in TABOO_MEMBERS
+    instance
   
-  checkObject = (object) ->
-    unless isObject(object)
-      throw new Error "
-        [CoffeeConcerns] Concern can extend only objects.
-        You gave: #{object}
-      "
+  unless Function.include?
+    fn = ->
+      l       = arguments.length
+      i       = -1
+      args    = [this]
+      args.push(arguments[i]) while ++i < l
+      CoffeeConcerns.include(args...)
   
-  checkClass = (Class) ->
-    unless isFunction(Class)
-      throw new Error "
-        [CoffeeConcerns] Concern can be included only in class (function).
-        You gave: #{Class}
-      "
+    if Object.defineProperty?
+      Object.defineProperty(Function::, 'include', value: fn)
+    else
+      Function::include = fn
   
-  checkConcern = (Concern) ->
-    unless isObject(Concern)
-      throw new Error "
-        [CoffeeConcerns] Concern must be object.
-        You gave: #{Concern}.
-      "
+  prefixErrorMessage = (msg) -> "[CoffeeConcerns] #{msg}"
   
-  tabooMembers  = ['included', 'ClassMembers']
-  hasOwnProp    = {}.hasOwnProperty
-  {isFunction, isArray, extend, clone, copySuper} = _
+  class BaseError extends Error
+    constructor: ->
+      super(@message)
+      Error.captureStackTrace?(this, @name) or (@stack = new Error().stack)
   
-  isObject = (obj) ->
-    obj isnt null and typeof obj is 'object' and not isArray(obj)
+  class InvalidClass extends BaseError
+    constructor: (Class) ->
+      @name    = 'InvalidClass'
+      @message = prefixErrorMessage("Concern can be included only in class (function). Got #{Class}")
+      super
   
-  bothObjects = (obj, other) ->
-    !!obj and !!other and isObject(obj) and isObject(other)
+  class InvalidInstance extends BaseError
+    constructor: (instance) ->
+      @name    = 'InvalidInstance'
+      @message = prefixErrorMessage("Concern can extend only instance (object). Got #{instance}")
+      super
   
-  bothArrays = (obj, other) ->
-    !!obj and !!other and isArray(obj) and isArray(other)
+  class InvalidConcern extends BaseError
+    constructor: (Concern) ->
+      @name    = 'InvalidConcern'
+      @message = prefixErrorMessage("Concern must be key-value object. Got #{Concern}")
+      super
   
-  Function.include || Object.defineProperty Function::, 'include', value: ->
-    length  = arguments.length
-    i       = -1
-    args    = Array(length)
-    args[i] = arguments[i] while ++i < length
-    args.unshift(this)
-    Concerns.include(args...)
-  
-  Concerns
+  CoffeeConcerns
   
 )
