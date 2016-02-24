@@ -50,7 +50,7 @@
       return !!obj && !!other && isArray(obj) && isArray(other);
     };
     CoffeeConcerns = {
-      VERSION: '1.0.3'
+      VERSION: '1.0.4'
     };
     CoffeeConcerns.include = function(Class, Concern) {
       var ClassMembers, InstanceMembers, _class, _proto, _super, hasConcerns, hasOwnConcerns, included, nextVal, prevVal, prop;
