@@ -1,4 +1,4 @@
-CoffeeConcerns = VERSION: '1.0.4'
+CoffeeConcerns = VERSION: '1.0.5'
 
 CoffeeConcerns.include = (Class, Concern) ->
   checkClass(Class)
