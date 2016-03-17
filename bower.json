@@ -1,6 +1,6 @@
 {
   "name": "coffee-concerns",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "main": "build/coffee-concerns.js",
   "description": "Concern pattern for CoffeeScript",
   "authors": [
@@ -17,7 +17,7 @@
     "gulpfile.*"
   ],
   "dependencies": {
-    "lodash": "^3.10.0",
+    "lodash": "^4.5.1",
     "yess": "^1.0.0"
   }
 }
