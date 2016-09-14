@@ -5,18 +5,18 @@
 
   (function(factory) {
     var root;
-    root = typeof self === 'object' && (typeof self !== "undefined" && self !== null ? self.self : void 0) === self ? self : typeof global === 'object' && (typeof global !== "undefined" && global !== null ? global.global : void 0) === global ? global : void 0;
-    if (typeof define === 'function' && define.amd) {
+    root = typeof self === 'object' && self !== null && self.self === self ? self : typeof global === 'object' && global !== null && global.global === global ? global : void 0;
+    if (typeof define === 'function' && typeof define.amd === 'object' && define.amd !== null) {
       define(['yess', 'lodash', 'exports'], function(_) {
-        return root.Concerns = factory(root, _);
+        return root.Concerns = factory(root, Object, Error, Function, _);
       });
-    } else if (typeof module === 'object' && module !== null && (module.exports != null) && typeof module.exports === 'object') {
-      module.exports = factory(root, require('yess'), require('lodash'));
+    } else if (typeof module === 'object' && module !== null && typeof module.exports === 'object' && module.exports !== null) {
+      module.exports = factory(root, Object, Error, Function, require('yess'), require('lodash'));
     } else {
-      root.Concerns = factory(root, root._);
+      root.Concerns = factory(root, Object, Error, Function, root._);
     }
-  })(function(__root__, _) {
-    var BaseError, CoffeeConcerns, InvalidClass, InvalidConcern, InvalidInstance, TABOO_MEMBERS, bothArrays, bothObjects, checkClass, checkConcern, checkInstance, copySuper, extend, fn, isArray, isClass, isFunction, isObject, prefixErrorMessage;
+  })(function(__root__, Object, Error, Function, _) {
+    var BaseError, CoffeeConcerns, InvalidClass, InvalidConcern, InvalidInstance, TABOO_MEMBERS, bothArrays, bothObjects, checkClass, checkConcern, checkInstance, copySuper, extend, fn, isArray, isClass, isFunction, isObject, j, len, prefixErrorMessage, property, ref;
     checkInstance = function(instance) {
       if (!isObject(instance)) {
         throw new InvalidInstance(instance);
@@ -50,25 +50,37 @@
       return !!obj && !!other && isArray(obj) && isArray(other);
     };
     CoffeeConcerns = {
-      VERSION: '1.0.6'
+      VERSION: '1.0.7'
     };
+    if (Object.defineProperty != null) {
+      ref = ['concerns', 'concernsOwner'];
+      for (j = 0, len = ref.length; j < len; j++) {
+        property = ref[j];
+        Object.defineProperty(Function.prototype, property, {
+          configurable: false,
+          enumerable: false,
+          value: void 0,
+          writable: true
+        });
+      }
+    }
     CoffeeConcerns.include = function(Class, Concern) {
-      var ClassMembers, InstanceMembers, _class, _proto, _super, hasConcerns, hasOwnConcerns, included, nextVal, prevVal, prop;
+      var ClassMembers, InstanceMembers, _class, _proto, _super, hasConcerns, hasOwnConcerns, nextval, prevval, prop, ref1;
       checkClass(Class);
       checkConcern(Concern);
       hasConcerns = !!Class.concerns;
-      hasOwnConcerns = hasConcerns && Class.concernsOf === Class;
+      hasOwnConcerns = hasConcerns && Class.concernsOwner === Class;
       if (hasConcerns && indexOf.call(Class.concerns, Concern) >= 0) {
         return Class;
       }
       if (hasConcerns) {
         if (!hasOwnConcerns) {
           Class.concerns = [].concat(Class.concerns);
-          Class.concernsOf = Class;
+          Class.concernsOwner = Class;
         }
       } else {
         Class.concerns = [];
-        Class.concernsOf = Class;
+        Class.concernsOwner = Class;
       }
       ClassMembers = Concern.ClassMembers;
       InstanceMembers = Concern.InstanceMembers || Concern;
@@ -78,45 +90,45 @@
       if (ClassMembers) {
         for (prop in ClassMembers) {
           if (!hasProp.call(ClassMembers, prop)) continue;
-          nextVal = ClassMembers[prop];
-          prevVal = _class[prop];
-          _class[prop] = bothObjects(prevVal, nextVal) ? extend({}, prevVal, nextVal) : bothArrays(prevVal, nextVal) ? [].concat(prevVal, nextVal) : nextVal;
+          nextval = ClassMembers[prop];
+          prevval = _class[prop];
+          _class[prop] = bothObjects(prevval, nextval) ? extend({}, prevval, nextval) : bothArrays(prevval, nextval) ? [].concat(prevval, nextval) : nextval;
         }
       }
       for (prop in InstanceMembers) {
         if (!hasProp.call(InstanceMembers, prop)) continue;
-        nextVal = InstanceMembers[prop];
+        nextval = InstanceMembers[prop];
         if (!(indexOf.call(TABOO_MEMBERS, prop) < 0)) {
           continue;
         }
-        prevVal = _proto[prop];
-        if (bothObjects(prevVal, nextVal)) {
-          nextVal = extend({}, prevVal, nextVal);
-        } else if (bothArrays(prevVal, nextVal)) {
-          nextVal = [].concat(prevVal, nextVal);
+        prevval = _proto[prop];
+        if (bothObjects(prevval, nextval)) {
+          nextval = extend({}, prevval, nextval);
+        } else if (bothArrays(prevval, nextval)) {
+          nextval = [].concat(prevval, nextval);
         } else {
-          prevVal = nextVal;
+          prevval = nextval;
         }
-        _super[prop] = prevVal;
-        _proto[prop] = nextVal;
+        _super[prop] = prevval;
+        _proto[prop] = nextval;
       }
       Class.concerns.push(Concern);
-      if (included = Concern.included) {
-        included.call(Class, Class);
+      if ((ref1 = Concern.included) != null) {
+        ref1.call(Class, Class);
       }
       return Class;
     };
     CoffeeConcerns.includes = function(Class, Concern) {
-      return !!Class.concerns && indexOf.call(Class.concerns, Concern) >= 0;
+      return (Class.concerns != null) && indexOf.call(Class.concerns, Concern) >= 0;
     };
     CoffeeConcerns.extend = function(instance, Concern) {
-      var prop, ref, value;
+      var prop, ref1, ref2, value;
       checkInstance(instance);
       checkConcern(Concern);
-      ref = Concern.InstanceMembers || Concern;
-      for (prop in ref) {
-        if (!hasProp.call(ref, prop)) continue;
-        value = ref[prop];
+      ref2 = (ref1 = Concern.InstanceMembers) != null ? ref1 : Concern;
+      for (prop in ref2) {
+        if (!hasProp.call(ref2, prop)) continue;
+        value = ref2[prop];
         if (indexOf.call(TABOO_MEMBERS, prop) < 0) {
           instance[prop] = value;
         }
@@ -149,8 +161,13 @@
       extend1(BaseError, superClass);
 
       function BaseError() {
+        var ref1;
         BaseError.__super__.constructor.call(this, this.message);
-        (typeof Error.captureStackTrace === "function" ? Error.captureStackTrace(this, this.name) : void 0) || (this.stack = new Error().stack);
+                if ((ref1 = typeof Error.captureStackTrace === "function" ? Error.captureStackTrace(this, this.name) : void 0) != null) {
+          ref1;
+        } else {
+          this.stack = new Error().stack;
+        };
       }
 
       return BaseError;

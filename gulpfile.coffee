@@ -9,7 +9,13 @@ preprocess = require 'gulp-preprocess'
 gulp.task 'default', ->
   gulp.start 'build'
 
-dependencies = [{require: 'lodash'}, {require: 'yess', global: '_'}]
+dependencies = [
+  {require: 'lodash'}
+  {require: 'yess',     global: '_'}
+  {global:  'Object',   native: yes}
+  {global:  'Error',    native: yes}
+  {global:  'Function', native: yes}
+]
 
 gulp.task 'build', ->
   gulp.src('source/__manifest__.coffee')

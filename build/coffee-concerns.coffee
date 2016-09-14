@@ -1,31 +1,31 @@
 ((factory) ->
 
   # Browser and WebWorker
-  root = if typeof self is 'object' and self?.self is self
+  root = if typeof self is 'object' and self isnt null and self.self is self
     self
 
   # Server
-  else if typeof global is 'object' and global?.global is global
+  else if typeof global is 'object' and global isnt null and global.global is global
     global
 
   # AMD
-  if typeof define is 'function' and define.amd
+  if typeof define is 'function' and typeof define.amd is 'object' and define.amd isnt null
     define ['yess', 'lodash', 'exports'], (_) ->
-      root.Concerns = factory(root, _)
+      root.Concerns = factory(root, Object, Error, Function, _)
 
   # CommonJS
   else if typeof module is 'object' and module isnt null and
-          module.exports? and typeof module.exports is 'object'
-    module.exports = factory(root, require('yess'), require('lodash'))
+          typeof module.exports is 'object' and module.exports isnt null
+    module.exports = factory(root, Object, Error, Function, require('yess'), require('lodash'))
 
   # Browser and the rest
   else
-    root.Concerns = factory(root, root._)
+    root.Concerns = factory(root, Object, Error, Function, root._)
 
   # No return value
   return
 
-)((__root__, _) ->
+)((__root__, Object, Error, Function, _) ->
   checkInstance = (instance) ->
     throw new InvalidInstance(instance) unless isObject(instance)
     true
@@ -52,7 +52,15 @@
   bothArrays = (obj, other) ->
     !!obj and !!other and isArray(obj) and isArray(other)
   
-  CoffeeConcerns = VERSION: '1.0.6'
+  CoffeeConcerns = VERSION: '1.0.7'
+  
+  if Object.defineProperty?
+    for property in ['concerns', 'concernsOwner']
+      Object.defineProperty Function::, property,
+        configurable: no
+        enumerable:   no
+        value:        undefined
+        writable:     yes
   
   CoffeeConcerns.include = (Class, Concern) ->
     checkClass(Class)
@@ -64,7 +72,7 @@
   
     # True if class did set own copy array of concerns
     # so class ancestors will not access parent class concerns array
-    hasOwnConcerns = hasConcerns and Class.concernsOf is Class
+    hasOwnConcerns = hasConcerns and Class.concernsOwner is Class
   
     # Do not include concern twice
     return Class if hasConcerns and Concern in Class.concerns
@@ -73,11 +81,11 @@
       # Set own copy array of concerns if it is necessary
       unless hasOwnConcerns
         Class.concerns      = [].concat(Class.concerns)
-        Class.concernsOf    = Class
+        Class.concernsOwner = Class
     else
       # Process initial setup for concerns-friendly class
       Class.concerns      = []
-      Class.concernsOf    = Class
+      Class.concernsOwner = Class
   
     # Reference to concern members
     ClassMembers    = Concern.ClassMembers
@@ -96,57 +104,57 @@
     # Include class members
     if ClassMembers
       # 'prop'    - property name
-      # 'nextVal' - value of this property in concern class members
-      # 'prevVal' - value of this property in class (current)
-      for own prop, nextVal of ClassMembers
-        prevVal = _class[prop]
+      # 'nextval' - value of this property in concern class members
+      # 'prevval' - value of this property in class (current)
+      for own prop, nextval of ClassMembers
+        prevval = _class[prop]
   
         # Try to merge values. Only values of the same type can be merged
         _class[prop] =
-          if bothObjects(prevVal, nextVal)
-            extend({}, prevVal, nextVal)
+          if bothObjects(prevval, nextval)
+            extend({}, prevval, nextval)
   
-          else if bothArrays(prevVal, nextVal)
-            [].concat(prevVal, nextVal)
+          else if bothArrays(prevval, nextval)
+            [].concat(prevval, nextval)
   
-          else nextVal
+          else nextval
   
     # 'prop'          - property name
-    # 'nextVal'       - value of this property in concern instance members
-    # 'prevVal'       - value of this property in class prototype (current)
+    # 'nextval'       - value of this property in concern instance members
+    # 'prevval'       - value of this property in class prototype (current)
     # 'TABOO_MEMBERS' - property names which must be not included.
     #                   This refers to 'include' hook and 'ClassMembers' when
     #                   instance members specified at concern root (instead of 'InstanceMembers')
-    for own prop, nextVal of InstanceMembers when prop not in TABOO_MEMBERS
-      prevVal = _proto[prop]
+    for own prop, nextval of InstanceMembers when prop not in TABOO_MEMBERS
+      prevval = _proto[prop]
   
       # Try to merge values
-      if bothObjects(prevVal, nextVal)
-        nextVal = extend({}, prevVal, nextVal)
+      if bothObjects(prevval, nextval)
+        nextval = extend({}, prevval, nextval)
   
-      else if bothArrays(prevVal, nextVal)
-        nextVal = [].concat(prevVal, nextVal)
+      else if bothArrays(prevval, nextval)
+        nextval = [].concat(prevval, nextval)
   
       else
         # This cheat allows you to override concern in future
-        prevVal = nextVal
+        prevval = nextval
   
-      _super[prop] = prevVal
-      _proto[prop] = nextVal
+      _super[prop] = prevval
+      _proto[prop] = nextval
   
     Class.concerns.push(Concern)
   
-    if included = Concern.included
-      included.call(Class, Class)
+    Concern.included?.call(Class, Class)
+  
     Class
   
   CoffeeConcerns.includes = (Class, Concern) ->
-    !!Class.concerns and Concern in Class.concerns
+    Class.concerns? and Concern in Class.concerns
   
   CoffeeConcerns.extend = (instance, Concern) ->
     checkInstance(instance)
     checkConcern(Concern)
-    for own prop, value of Concern.InstanceMembers or Concern
+    for own prop, value of Concern.InstanceMembers ? Concern
       instance[prop] = value if prop not in TABOO_MEMBERS
     instance
   
@@ -168,7 +176,7 @@
   class BaseError extends Error
     constructor: ->
       super(@message)
-      Error.captureStackTrace?(this, @name) or (@stack = new Error().stack)
+      Error.captureStackTrace?(this, @name) ? (@stack = new Error().stack)
   
   class InvalidClass extends BaseError
     constructor: (Class) ->
