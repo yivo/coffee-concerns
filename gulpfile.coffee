@@ -6,7 +6,10 @@ plumber    = require 'gulp-plumber'
 del        = require 'del'
 preprocess = require 'gulp-preprocess'
 
-require('./node_modules/preprocess/lib/regexrules').coffee.include = "^(.*?)#+[ \t]*\%include(?!-)[ \t]+(.*?)[ \t]*$"
+try
+  require('./gulp-preprocess/node_modules/preprocess/lib/regexrules').coffee.include = "^(.*?)#+[ \t]*\%include(?!-)[ \t]+(.*?)[ \t]*$"
+catch
+  require('./node_modules/preprocess/lib/regexrules').coffee.include = "^(.*?)#+[ \t]*\%include(?!-)[ \t]+(.*?)[ \t]*$"
 
 gulp.task 'default', ['build'], ->
 
