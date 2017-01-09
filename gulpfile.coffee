@@ -6,18 +6,18 @@ plumber    = require 'gulp-plumber'
 del        = require 'del'
 preprocess = require 'gulp-preprocess'
 
-gulp.task 'default', ->
-  gulp.start 'build'
+require('./node_modules/preprocess/lib/regexrules').coffee.include = "^(.*?)#+[ \t]*\%include(?!-)[ \t]+(.*?)[ \t]*$"
 
-dependencies = [
-  {require: 'lodash'}
-  {require: 'yess',     global: '_'}
-  {global:  'Object',   native: yes}
-  {global:  'Error',    native: yes}
-  {global:  'Function', native: yes}
-]
+gulp.task 'default', ['build'], ->
 
 gulp.task 'build', ->
+  dependencies = [
+    {require: 'lodash'}
+    {require: 'yess',      global: '_'}
+    {global:  'Object',    native: yes}
+    {global:  'TypeError', native: yes}
+    {global:  'Function',  native: yes}
+  ]
   gulp.src('source/__manifest__.coffee')
     .pipe plumber()
     .pipe preprocess()

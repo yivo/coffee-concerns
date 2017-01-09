@@ -2,14 +2,14 @@ describe 'Concern include API', ->
   describe 'ClassMembers and InstanceMembers', ->
     it 'should correctly extend target', ->
       Concern =
-        included: (Class) -> Class and Class.hookFired = yes
-        ClassMembers: method: ->
-        InstanceMembers: method: ->
+        included: (Class) -> Class.hookFired = yes
+        ClassMembers: classMethod: ->
+        InstanceMembers: instanceMethod: ->
       class Class
         @include Concern
 
-      expect(Class.method).toBe(Concern.ClassMembers.method)
-      expect(Class::method).toBe(Concern.InstanceMembers.method)
+      expect(Class.classMethod).toBe(Concern.ClassMembers.classMethod)
+      expect(Class::instanceMethod).toBe(Concern.InstanceMembers.instanceMethod)
       expect(Class.hookFired).toBe(true)
       expect(Class::included).toBeUndefined()
 
@@ -39,7 +39,7 @@ describe 'Concern include API', ->
   describe 'InstanceMembers(root)', ->
     it 'should correctly extend target', ->
       Concern =
-        included: (Class) -> Class and Class.hookFired = yes
+        included: (Class) -> Class.hookFired = yes
         method: ->
       class Class
         @include Concern
@@ -50,12 +50,12 @@ describe 'Concern include API', ->
   describe 'ClassMembers and InstanceMembers(root)', ->
     it 'should correctly extend target', ->
       Concern =
-        included: (Class) -> Class and Class.hookFired = yes
-        ClassMembers: method: ->
-        method: ->
+        included: (Class) -> Class.hookFired = yes
+        ClassMembers: classMethod: ->
+        instanceMethod: ->
       class Class
         @include Concern
-      expect(Class::method).toBe(Concern.method)
+      expect(Class::instanceMethod).toBe(Concern.instanceMethod)
       expect(Class.hookFired).toBe(true)
-      expect(Class.method).toBe Concern.ClassMembers.method
+      expect(Class.classMethod).toBe(Concern.ClassMembers.classMethod)
       expect(Class::included).toBeUndefined()

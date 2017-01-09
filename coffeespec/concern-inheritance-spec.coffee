@@ -2,27 +2,17 @@ describe 'Concern when inherited', ->
 
   Concern =
     method: ->
-    hash:
-      foo: 1
-      bar: 2
-      baz: 3
+    hash: { foo: 1, bar: 2, baz: 3 }
     text: 'foo'
-
-    ClassMembers:
-      array: [3]
-
-  extend = (base, objs...) ->
-    for obj in objs
-      base[prop] = value for own prop, value of obj
-    base
+    ClassMembers: { array: [3] }
 
   it 'should be correctly inherited', ->
     class Base
       @include Concern
+      
     class Derived extends Base
 
     expect(Base.__super__.method).toBe(Concern.method)
-
     expect(Derived::method).toBe(Concern.method)
     expect(Derived::hash).toBe(Concern.hash)
     expect(Derived::text).toBe(Concern.text)
@@ -33,9 +23,7 @@ describe 'Concern when inherited', ->
   it 'should correctly override', ->
     class Base
       method: ->
-      hash:
-        qux: 4
-
+      hash: {qux: 4}
       @array: [1]
 
     class DerivedFoo extends Base
@@ -46,13 +34,13 @@ describe 'Concern when inherited', ->
       @include Concern
 
     expect(DerivedFoo.__super__.method).toBe(Concern.method)
-    expect(DerivedFoo.__super__.hash).toBe(Base::hash)
-    expect(DerivedFoo::hash).toEqual extend({}, Base::hash, Concern.hash)
+    expect(DerivedFoo.__super__.hash).toBe(Concern.hash)
+    expect(DerivedFoo::hash).toBe(Concern.hash)
 
     expect(DerivedBar.__super__.method).toBe(Concern.method)
-    expect(DerivedBar.__super__.hash).toBe(Base::hash)
-    expect(DerivedBar::hash).toEqual extend({}, Base::hash, Concern.hash)
+    expect(DerivedBar.__super__.hash).toBe(Concern.hash)
+    expect(DerivedBar::hash).toBe(Concern.hash)
 
-    expect(Base.array).toEqual [1]
-    expect(DerivedFoo.array).toEqual [1,3]
-    expect(DerivedBar.array).toEqual [2,3]
+    expect(Base.array).toEqual([1])
+    expect(DerivedFoo.array).toEqual([3])
+    expect(DerivedBar.array).toEqual([3])

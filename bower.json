@@ -1,9 +1,9 @@
 {
   "name": "coffee-concerns",
   "main": "build/coffee-concerns.js",
-  "description": "Concern pattern for CoffeeScript",
+  "description": "Implementation of the Ruby's include and extend for CoffeeScript environment.",
   "authors": [
-    "Yaroslav Konoplov <yaroslav@inbox.com>"
+    "Yaroslav Konoplov <eahome00@gmail.com>"
   ],
   "license": "MIT",
   "ignore": [
@@ -16,7 +16,7 @@
     "gulpfile.*"
   ],
   "dependencies": {
-    "lodash": "^4.5.1",
-    "yess": "^1.0.0"
+    "lodash": "^4",
+    "yess": "^1"
   }
 }
