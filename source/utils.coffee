@@ -1,16 +1,16 @@
 checkInstance = (instance) ->
   unless isObject(instance)
-    throw new TypeError("[CoffeeConcerns] Concern can only extend JavaScript object (typically instance of something). Got: #{instance}") 
+    throw new TypeError "[CoffeeConcerns] Concern can only extend JavaScript object (given #{instance})"
   true
 
 checkClass = (Class) ->
   unless isClass(Class)
-    throw new TypeError("[CoffeeConcerns] Concern can only be included in JavaScript class (function). Got: #{Class}") 
+    throw new TypeError "[CoffeeConcerns] Concern can only be included in JavaScript class e.g. function (given: #{Class})"
   true
 
 checkConcern = (Concern) ->
   unless isObject(Concern)
-    throw new TypeError("[CoffeeConcerns] Concern must be JavaScript object. Got: #{Concern}") 
+    throw new TypeError "[CoffeeConcerns] Concern must be JavaScript object (given #{Concern})"
   true
 
 TABOO_MEMBERS = []

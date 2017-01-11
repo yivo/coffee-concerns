@@ -18,19 +18,19 @@
     var CoffeeConcerns, TABOO_MEMBERS, checkClass, checkConcern, checkInstance, defineProperty, isClass, isObject, privatizeSuperclass, ref;
     checkInstance = function(instance) {
       if (!isObject(instance)) {
-        throw new TypeError("[CoffeeConcerns] Concern can only extend JavaScript object (typically instance of something). Got: " + instance);
+        throw new TypeError("[CoffeeConcerns] Concern can only extend JavaScript object (given " + instance + ")");
       }
       return true;
     };
     checkClass = function(Class) {
       if (!isClass(Class)) {
-        throw new TypeError("[CoffeeConcerns] Concern can only be included in JavaScript class (function). Got: " + Class);
+        throw new TypeError("[CoffeeConcerns] Concern can only be included in JavaScript class e.g. function (given: " + Class + ")");
       }
       return true;
     };
     checkConcern = function(Concern) {
       if (!isObject(Concern)) {
-        throw new TypeError("[CoffeeConcerns] Concern must be JavaScript object. Got: " + Concern);
+        throw new TypeError("[CoffeeConcerns] Concern must be JavaScript object (given " + Concern + ")");
       }
       return true;
     };
