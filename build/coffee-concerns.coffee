@@ -128,9 +128,9 @@
   
   
   defineProperty Function::, 'include',
-    configurable: no
-    enumerable:   no
-    writable:     no
+    configurable: false
+    enumerable:   false
+    writable:     false
     value:        ->
       l = arguments.length
       i = -1
@@ -139,10 +139,10 @@
       CoffeeConcerns.include(a...)
   
   defineProperty Function::, 'concerns',
-    configurable: no
-    enumerable:   no
+    configurable: false
+    enumerable:   false
     value:        []
-    writable:     yes
+    writable:     true
   
   CoffeeConcerns
 )

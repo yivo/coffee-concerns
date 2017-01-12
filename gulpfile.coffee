@@ -17,9 +17,9 @@ gulp.task 'build', ->
   dependencies = [
     {require: 'lodash'}
     {require: 'yess',      global: '_'}
-    {global:  'Object',    native: yes}
-    {global:  'TypeError', native: yes}
-    {global:  'Function',  native: yes}
+    {global:  'Object',    native: true}
+    {global:  'TypeError', native: true}
+    {global:  'Function',  native: true}
   ]
   gulp.src('source/__manifest__.coffee')
     .pipe plumber()
@@ -34,7 +34,7 @@ gulp.task 'build', ->
 gulp.task 'coffeespec', ->
   del.sync 'spec/**/*'
   gulp.src('coffeespec/**/*.coffee')
-    .pipe coffee(bare: yes)
+    .pipe coffee(bare: true)
     .pipe gulp.dest('spec')
   gulp.src('coffeespec/support/jasmine.json')
     .pipe gulp.dest('spec/support')
