@@ -1,5 +1,4 @@
 CoffeeConcerns = 
-  VERSION: '1.0.7'
 
   include: (Class, Concern) ->
     checkClass(Class)

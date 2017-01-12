@@ -46,7 +46,6 @@
       return object[property] = descriptor.value;
     };
     CoffeeConcerns = {
-      VERSION: '1.0.7',
       include: function(Class, Concern) {
         var ClassMembers, InstanceMembers, newval, oldval, prop, ref1, ref2, ref3;
         checkClass(Class);
@@ -126,6 +125,7 @@
       value: [],
       writable: true
     });
+    CoffeeConcerns.VERSION = '1.0.8';
     return CoffeeConcerns;
   });
 

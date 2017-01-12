@@ -53,7 +53,6 @@
                                              object[property] = descriptor.value
   
   CoffeeConcerns = 
-    VERSION: '1.0.7'
   
     include: (Class, Concern) ->
       checkClass(Class)
@@ -143,6 +142,8 @@
     enumerable:   false
     value:        []
     writable:     true
+  
+  CoffeeConcerns.VERSION = '1.0.8'
   
   CoffeeConcerns
 )
