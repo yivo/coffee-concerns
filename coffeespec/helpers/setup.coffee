@@ -1,1 +1,1 @@
-require '../../build/coffee-concerns.js'
+global.Concerns = require '../../build/coffee-concerns.js'

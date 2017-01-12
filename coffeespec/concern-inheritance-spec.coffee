@@ -1,46 +1,55 @@
-describe 'Concern when inherited', ->
+describe 'Concern inheritance', ->
 
   Concern =
-    method: ->
-    hash: { foo: 1, bar: 2, baz: 3 }
-    text: 'foo'
-    ClassMembers: { array: [3] }
+    instanceMethod: ->
+    instanceAttribute: [1,1,1,1]
+    ClassMembers: { classMethod: -> }
 
-  it 'should be correctly inherited', ->
+  it 'works as expected for inherited and overriden members', ->
+    fn = [(->), (->), (->), (->)]
+    
     class Base
+      instanceAttribute: [2,2,2,2]
+      instanceMethod: fn[0]
+      @classMethod: fn[1]
+    class Derived1 extends Base
       @include Concern
-      
-    class Derived extends Base
-
-    expect(Base.__super__.method).toBe(Concern.method)
-    expect(Derived::method).toBe(Concern.method)
-    expect(Derived::hash).toBe(Concern.hash)
-    expect(Derived::text).toBe(Concern.text)
-    expect(Derived.__super__.method).toBe(Concern.method)
-    expect(Derived.__super__.hash).toBe(Concern.hash)
-    expect(Derived.__super__.text).toBe(Concern.text)
-
-  it 'should correctly override', ->
-    class Base
-      method: ->
-      hash: {qux: 4}
-      @array: [1]
-
-    class DerivedFoo extends Base
+      @classMethod: fn[2]
+    class Derived2 extends Base
       @include Concern
+      instanceAttribute: [0,0,0,0]
+      instanceMethod: fn[3]
 
-    class DerivedBar extends Base
-      @array: [2]
-      @include Concern
+    # Base
+    expect('__super__' of Base).toBe(false)
+    
+    expect(Base.classMethod).toBe(fn[1])
+    
+    expect(Base::instanceMethod).toBe(fn[0])
+    
+    expect(Base::instanceAttribute).toEqual([2,2,2,2])
 
-    expect(DerivedFoo.__super__.method).toBe(Concern.method)
-    expect(DerivedFoo.__super__.hash).toBe(Concern.hash)
-    expect(DerivedFoo::hash).toBe(Concern.hash)
+    # Derived1
+    expect(Derived1.__super__?).toBe(true)
+    expect(Derived1.__super__).not.toBe(Base.__super__)
+    
+    expect(Derived1.classMethod).toBe(fn[2])
+    
+    expect(Derived1::instanceMethod).toBe(Concern.instanceMethod)
+    expect(Derived1.__super__.instanceMethod).toBe(Concern.instanceMethod)
+    
+    expect(Derived1::instanceAttribute).toBe(Concern.instanceAttribute)
+    expect(Derived1.__super__.instanceAttribute).toBe(Concern.instanceAttribute)
 
-    expect(DerivedBar.__super__.method).toBe(Concern.method)
-    expect(DerivedBar.__super__.hash).toBe(Concern.hash)
-    expect(DerivedBar::hash).toBe(Concern.hash)
-
-    expect(Base.array).toEqual([1])
-    expect(DerivedFoo.array).toEqual([3])
-    expect(DerivedBar.array).toEqual([3])
+    # Derived2
+    expect(Derived2.__super__?).toBe(true)
+    expect(Derived2.__super__).not.toBe(Base.__super__)
+    expect(Derived2.__super__).not.toBe(Derived1.__super__)
+    
+    expect(Derived2.classMethod).toBe(Concern.ClassMembers.classMethod)
+    
+    expect(Derived2::instanceMethod).toBe(fn[3])
+    expect(Derived2.__super__.instanceMethod).toBe(Concern.instanceMethod)
+    
+    expect(Derived2::instanceAttribute).toEqual([0,0,0,0])
+    expect(Derived2.__super__.instanceAttribute).toEqual([1,1,1,1])
