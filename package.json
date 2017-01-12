@@ -1,6 +1,6 @@
 {
   "name": "coffee-concerns",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "Implementation of the Ruby's include and extend for CoffeeScript environment.",
   "main": "build/coffee-concerns.js",
   "scripts": {
@@ -21,7 +21,8 @@
     "gulp-iife-wrap": "^1.0.5",
     "gulp-plumber": "^1.0.0",
     "gulp-preprocess": "^2.0.0",
-    "jasmine": "^2.2.1"
+    "jasmine": "^2.2.1",
+    "preprocess": "^3.1.0"
   },
   "dependencies": {
     "lodash": "^4",

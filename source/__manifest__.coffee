@@ -18,6 +18,6 @@ defineProperty Function::, 'concerns',
   value:        []
   writable:     true
 
-CoffeeConcerns.VERSION = '1.0.8'
+CoffeeConcerns.VERSION = '1.0.9'
 
 CoffeeConcerns
