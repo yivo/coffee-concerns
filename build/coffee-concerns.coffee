@@ -1,26 +1,33 @@
+###!
+# coffee-concerns 1.0.10 | https://github.com/yivo/coffee-concerns | MIT License
+###
+
 ((factory) ->
 
-  # Browser and WebWorker
-  root = if typeof self is 'object' and self isnt null and self.self is self
-    self
+  __root__ = 
+    # The root object for Browser or Web Worker
+    if typeof self is 'object' and self isnt null and self.self is self
+      self
 
-  # Server
-  else if typeof global is 'object' and global isnt null and global.global is global
-    global
+    # The root object for Server-side JavaScript Runtime
+    else if typeof global is 'object' and global isnt null and global.global is global
+      global
 
-  # AMD
+    else
+      Function('return this')()
+
+  # Asynchronous Module Definition (AMD)
   if typeof define is 'function' and typeof define.amd is 'object' and define.amd isnt null
-    define ['yess', 'lodash', 'exports'], (_) ->
-      root.Concerns = factory(root, Object, TypeError, Function, _)
+    define ['yess', 'lodash'], (_) ->
+      __root__.Concerns = factory(__root__, Object, TypeError, Function, _)
 
-  # CommonJS
-  else if typeof module is 'object' and module isnt null and
-          typeof module.exports is 'object' and module.exports isnt null
-    module.exports = factory(root, Object, TypeError, Function, require('yess'), require('lodash'))
+  # Server-side JavaScript Runtime compatible with CommonJS Module Spec
+  else if typeof module is 'object' and module isnt null and typeof module.exports is 'object' and module.exports isnt null
+    module.exports = factory(__root__, Object, TypeError, Function, require('yess'), require('lodash'))
 
-  # Browser and the rest
+  # Browser, Web Worker and the rest
   else
-    root.Concerns = factory(root, Object, TypeError, Function, root._)
+    __root__.Concerns = factory(__root__, Object, TypeError, Function, _)
 
   # No return value
   return
@@ -143,7 +150,7 @@
     value:        []
     writable:     true
   
-  CoffeeConcerns.VERSION = '1.0.9'
+  CoffeeConcerns.VERSION = '1.0.10'
   
   CoffeeConcerns
 )

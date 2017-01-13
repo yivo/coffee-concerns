@@ -1,10 +1,11 @@
 gulp       = require 'gulp'
 coffee     = require 'gulp-coffee'
 concat     = require 'gulp-concat'
-iife       = require 'gulp-iife-wrap'
+umd        = require 'gulp-umd-wrap'
 plumber    = require 'gulp-plumber'
 del        = require 'del'
 preprocess = require 'gulp-preprocess'
+fs         = require 'fs'
 
 try
   require('./gulp-preprocess/node_modules/preprocess/lib/regexrules').coffee.include = "^(.*?)#+[ \t]*\%include(?!-)[ \t]+(.*?)[ \t]*$"
@@ -21,10 +22,11 @@ gulp.task 'build', ->
     {global:  'TypeError', native: true}
     {global:  'Function',  native: true}
   ]
+  header = fs.readFileSync('source/__license__.coffee')
   gulp.src('source/__manifest__.coffee')
     .pipe plumber()
     .pipe preprocess()
-    .pipe iife {dependencies, global: 'Concerns'}
+    .pipe umd({global: 'Concerns', dependencies, header})
     .pipe concat('coffee-concerns.coffee')
     .pipe gulp.dest('build')
     .pipe coffee()

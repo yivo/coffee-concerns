@@ -16,7 +16,7 @@
     "gulpfile.*"
   ],
   "dependencies": {
-    "lodash": "^4",
-    "yess": "^1"
+    "lodash": "4.x",
+    "yess": "1.x"
   }
 }

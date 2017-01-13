@@ -1,18 +1,23 @@
+
+/*!
+ * coffee-concerns 1.0.10 | https://github.com/yivo/coffee-concerns | MIT License
+ */
+
 (function() {
   var indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
     hasProp = {}.hasOwnProperty;
 
   (function(factory) {
-    var root;
-    root = typeof self === 'object' && self !== null && self.self === self ? self : typeof global === 'object' && global !== null && global.global === global ? global : void 0;
+    var __root__;
+    __root__ = typeof self === 'object' && self !== null && self.self === self ? self : typeof global === 'object' && global !== null && global.global === global ? global : Function('return this')();
     if (typeof define === 'function' && typeof define.amd === 'object' && define.amd !== null) {
-      define(['yess', 'lodash', 'exports'], function(_) {
-        return root.Concerns = factory(root, Object, TypeError, Function, _);
+      define(['yess', 'lodash'], function(_) {
+        return __root__.Concerns = factory(__root__, Object, TypeError, Function, _);
       });
     } else if (typeof module === 'object' && module !== null && typeof module.exports === 'object' && module.exports !== null) {
-      module.exports = factory(root, Object, TypeError, Function, require('yess'), require('lodash'));
+      module.exports = factory(__root__, Object, TypeError, Function, require('yess'), require('lodash'));
     } else {
-      root.Concerns = factory(root, Object, TypeError, Function, root._);
+      __root__.Concerns = factory(__root__, Object, TypeError, Function, _);
     }
   })(function(__root__, Object, TypeError, Function, _) {
     var CoffeeConcerns, TABOO_MEMBERS, checkClass, checkConcern, checkInstance, defineProperty, isClass, isObject, privatizeSuperclass, ref;
@@ -125,7 +130,7 @@
       value: [],
       writable: true
     });
-    CoffeeConcerns.VERSION = '1.0.9';
+    CoffeeConcerns.VERSION = '1.0.10';
     return CoffeeConcerns;
   });
 
